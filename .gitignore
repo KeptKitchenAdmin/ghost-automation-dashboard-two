@@ -236,3 +236,7 @@ node_modules/
 !.next/static/media/
 cache/
 .next/cache/
+# Webpack cache files (these cause Cloudflare deployment failures)
+**/*.pack
+**/cache/webpack/
+.next/cache/webpack/
