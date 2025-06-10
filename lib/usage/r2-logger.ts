@@ -52,7 +52,7 @@ export class R2UsageLogger {
     }
   }
 
-  // Convenience methods for each service
+  // Convenience methods for each service with accurate free plan tracking
   static async logOpenAI(data: {
     operation: string;
     tokens: number;
@@ -67,6 +67,8 @@ export class R2UsageLogger {
       cost: data.cost,
       model: data.model
     });
+    
+    console.log(`💰 OpenAI: $${data.cost.toFixed(4)} • ${data.tokens} tokens • Operation: ${data.operation}`);
   }
 
   static async logAnthropic(data: {
@@ -83,12 +85,15 @@ export class R2UsageLogger {
       cost: data.cost,
       model: data.model
     });
+    
+    console.log(`💰 Anthropic: $${data.cost.toFixed(4)} • ${data.tokens} tokens • Operation: ${data.operation}`);
   }
 
   static async logElevenLabs(data: {
     operation: string;
     characters: number;
     cost: number;
+    credits?: number; // Track credits used
   }): Promise<void> {
     await this.logUsage({
       service: 'elevenlabs',
@@ -97,11 +102,15 @@ export class R2UsageLogger {
       requests: 1,
       cost: data.cost
     });
+    
+    const creditsUsed = data.credits || Math.ceil(data.characters * 0.15); // Estimate credits
+    console.log(`🔊 ElevenLabs: ~${creditsUsed} credits • ${data.characters} chars • Operation: ${data.operation}`);
   }
 
   static async logHeyGen(data: {
     operation: string;
     cost: number;
+    credits?: number; // Track credits used (typically 0.5 per clip)
   }): Promise<void> {
     await this.logUsage({
       service: 'heygen',
@@ -109,6 +118,9 @@ export class R2UsageLogger {
       requests: 1,
       cost: data.cost
     });
+    
+    const creditsUsed = data.credits || 0.5; // Default 0.5 credits per clip
+    console.log(`🎬 HeyGen: ${creditsUsed} credits used • Operation: ${data.operation} • ⚠️ BOTTLENECK SERVICE`);
   }
 
   static async logGoogleCloud(data: {
@@ -121,6 +133,8 @@ export class R2UsageLogger {
       requests: 1,
       cost: data.cost
     });
+    
+    console.log(`☁️ Google Cloud: $${data.cost.toFixed(4)} • Operation: ${data.operation}`);
   }
 }
 

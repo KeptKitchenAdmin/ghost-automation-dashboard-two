@@ -45,6 +45,19 @@ usage-logs/
     └── ...
 ```
 
+## 🎯 Free Plan Limits (CONFIRMED)
+
+### **Actual Account Limits:**
+- **OpenAI:** $20/month budget (currently $0.01 used) - 4,000-20,000 clip capacity
+- **ElevenLabs:** 10,000 credits/month - 65-130 clip capacity  
+- **HeyGen:** 10 credits/month - ~20 clip capacity ⚠️ **BOTTLENECK**
+- **Google Cloud:** $300 credit, 88 days remaining - 25,000+ clip capacity
+
+### **System Capacity:**
+- **Monthly Limit:** ~20 clips (limited by HeyGen's 10 credits)
+- **Recommended Daily Limit:** 1 clip (~20 clips ÷ 30 days)
+- **Safety Buffer:** Keep 2 HeyGen credits as emergency reserve
+
 ## 🔧 Usage During Content Generation
 
 ### **In Your Content Generation Code:**
@@ -59,17 +72,25 @@ await R2UsageLogger.logOpenAI({
   model: 'gpt-4'
 })
 
-// After HeyGen call:
+// After HeyGen call (TRACK CAREFULLY - BOTTLENECK SERVICE):
 await R2UsageLogger.logHeyGen({
   operation: 'video-generation',
-  cost: 0.30
+  cost: 0.30,
+  credits: 0.5  // Typically 0.5 credits per clip
 })
 
 // After ElevenLabs call:
 await R2UsageLogger.logElevenLabs({
   operation: 'voice-synthesis',
   characters: 500,
-  cost: 0.002
+  cost: 0.002,
+  credits: 150  // Estimated credits used
+})
+
+// After Google Cloud call:
+await R2UsageLogger.logGoogleCloud({
+  operation: 'speech-to-text',
+  cost: 0.012
 })
 ```
 

@@ -282,6 +282,33 @@ export default function APIUsagePage() {
         </div>
       </div>
 
+      {/* Free Plan Limits */}
+      <div className="luxury-card mt-8 bg-green-50 border-green-200">
+        <h2 className="luxury-heading-lg mb-4 text-green-800">Free Plan Capacity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="text-center">
+            <div className="luxury-heading-md text-green-600">~20 clips/month</div>
+            <div className="luxury-body-small text-green-700">Total Capacity</div>
+            <div className="luxury-body-small text-green-600 mt-1">Limited by HeyGen (10 credits)</div>
+          </div>
+          <div className="text-center">
+            <div className="luxury-heading-md text-blue-600">$20/month</div>
+            <div className="luxury-body-small text-blue-700">OpenAI Budget</div>
+            <div className="luxury-body-small text-blue-600 mt-1">4,000-20,000 clip capacity</div>
+          </div>
+          <div className="text-center">
+            <div className="luxury-heading-md text-amber-600">10K credits</div>
+            <div className="luxury-body-small text-amber-700">ElevenLabs</div>
+            <div className="luxury-body-small text-amber-600 mt-1">65-130 clip capacity</div>
+          </div>
+          <div className="text-center">
+            <div className="luxury-heading-md text-purple-600">$300 credit</div>
+            <div className="luxury-body-small text-purple-700">Google Cloud</div>
+            <div className="luxury-body-small text-purple-600 mt-1">25,000+ clip capacity</div>
+          </div>
+        </div>
+      </div>
+
       {/* Implementation Note */}
       <div className="luxury-card mt-8 bg-blue-50 border-blue-200">
         <div className="flex items-start">
@@ -292,7 +319,7 @@ export default function APIUsagePage() {
             <h3 className="luxury-heading-md text-blue-800 mb-2">Content Generation Only</h3>
             <p className="luxury-body-small text-blue-700">
               This dashboard shows usage data logged during your content generation workflow: 
-              OpenAI → HeyGen → ElevenLabs. No external APIs are called for monitoring purposes.
+              OpenAI → HeyGen → ElevenLabs → Google Cloud. No external APIs are called for monitoring purposes.
               All data comes from R2 storage logs created during actual content generation.
             </p>
           </div>
