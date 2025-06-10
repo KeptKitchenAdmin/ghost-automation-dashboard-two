@@ -9,7 +9,7 @@
     "build:production": "rm -rf .next && npm run build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && npx wrangler pages deploy .next --project-name=ghost-automation-dashboard-three"
+    "deploy": "npm run build && npx wrangler pages deploy out --project-name=ghost-automation-dashboard-three"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.4.0",

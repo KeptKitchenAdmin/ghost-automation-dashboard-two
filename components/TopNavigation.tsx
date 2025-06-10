@@ -15,7 +15,8 @@ import {
   Settings,
   TrendingUp,
   Bell,
-  Search
+  Search,
+  Activity
 } from 'lucide-react'
 
 const navigation = [
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Campaigns', href: '/campaigns', icon: Target },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'API Usage', href: '/api-usage', icon: Activity },
   { name: 'Financials', href: '/financials', icon: DollarSign },
 ]
 
@@ -69,11 +71,6 @@ export default function TopNavigation() {
             {/* Status Indicator */}
             <div className="luxury-status-success">
               Live
-            </div>
-            
-            {/* Revenue */}
-            <div className="luxury-body-muted">
-              Revenue: $0
             </div>
             
             {/* Profile */}

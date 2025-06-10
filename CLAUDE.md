@@ -134,6 +134,49 @@ const revenue = realApiData || [
 
 **This rule applies to ALL components: charts, metrics, activity feeds, lead trackers, etc.**
 
+## 🚨 **CRITICAL RULE: API CALLS ONLY DURING CONTENT GENERATION**
+**ABSOLUTE PROHIBITION ON MONITORING/BACKGROUND API CALLS**
+
+### **✅ CORRECT API USAGE - BRIEF CONTENT GENERATION WORKFLOW:**
+```
+User clicks "Generate Content"
+├── OpenAI API call → script generated → CALL ENDS
+├── HeyGen API call → video generated → CALL ENDS  
+├── ElevenLabs API call → audio generated → CALL ENDS
+└── Assembly/download → COMPLETE → ALL API CALLS STOP
+```
+**Duration: 30-60 seconds total, then COMPLETE SILENCE**
+
+### **❌ NEVER BUILD THESE PATTERNS:**
+- Background processes making API calls
+- Polling timers checking usage every X seconds  
+- Dashboard components that call APIs on page load
+- "Refresh" buttons that call external APIs for monitoring
+- Any ongoing/continuous API communication
+- Monitoring API calls (OpenAI usage API, ElevenLabs subscription API, etc.)
+- Automatic polling or intervals of any kind
+
+### **✅ REQUIRED ARCHITECTURE:**
+- **APIs called ONLY during transactional content generation**
+- **Dashboard reads ONLY from Cloudflare R2 storage**
+- **Usage logging happens AFTER each API call (to R2)**
+- **Zero external API calls outside content generation workflow**
+- **All usage data stored locally in R2, never fetched from APIs**
+
+### **🎯 API CALL TIMING:**
+- **Active API usage:** 30-60 seconds during generation
+- **Rest of time:** COMPLETE API SILENCE
+- **Dashboard:** Reads R2 files only, NEVER calls external APIs
+- **Monitoring:** ZERO - all data comes from R2 logs
+
+### **Why This Matters:**
+- Prevents unnecessary API costs and rate limiting
+- Ensures complete privacy (APIs never used for monitoring)
+- Maintains predictable, controlled API usage patterns
+- Avoids background processes that could fail or consume resources
+
+**This rule applies to ALL external API integrations: OpenAI, Anthropic, ElevenLabs, HeyGen, Google Cloud, etc.**
+
 ## 🗄️ **CLOUDFLARE R2 STORAGE INTEGRATION**
 
 ### **R2 Configuration:**
