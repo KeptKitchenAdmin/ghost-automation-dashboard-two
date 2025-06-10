@@ -228,3 +228,11 @@ frontend/.env.local
 .next/
 out/
 node_modules/
+# Exclude large webpack cache files from deployment
+.next/cache/
+.next/static/chunks/
+# Keep essential files only
+!.next/static/css/
+!.next/static/media/
+cache/
+.next/cache/

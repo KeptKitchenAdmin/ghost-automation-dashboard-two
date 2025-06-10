@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npm run build:cleanup",
+    "build:cleanup": "rm -rf .next/cache .next/static/chunks/webpack-*.js || true",
+    "build:production": "rm -rf .next && next build && npm run build:cleanup",
     "start": "next start",
     "lint": "next lint",
     "deploy": "npm run build && npx wrangler pages deploy out --project-name=ghost-automation-dashboard-three"
