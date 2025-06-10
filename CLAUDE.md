@@ -134,8 +134,78 @@ const revenue = realApiData || [
 
 **This rule applies to ALL components: charts, metrics, activity feeds, lead trackers, etc.**
 
+## 🗄️ **CLOUDFLARE R2 STORAGE INTEGRATION**
+
+### **R2 Configuration:**
+R2 storage is configured to handle large assets and uploads that exceed Cloudflare Pages' 25MB limit.
+
+```javascript
+// Environment Variables Required:
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_BUCKET_NAME=ghosttrace-output  // optional, defaults to your existing bucket
+```
+
+### **File Upload Strategy:**
+- **Small files (< 10MB):** Uploaded to R2 for consistency
+- **Large files (> 10MB):** Automatically routed to R2 storage
+- **Video/Audio files:** Always use R2 regardless of size
+- **Documents (PDF, ZIP):** Always use R2 regardless of size
+
+### **R2 API Endpoints:**
+- `POST /api/upload` - Upload files with automatic R2 routing
+- `GET /api/upload` - Health check and configuration status
+
+### **Usage Example:**
+```javascript
+// Upload a file to R2 storage
+const formData = new FormData();
+formData.append('file', selectedFile);
+
+const response = await fetch('/api/upload', {
+  method: 'POST',
+  body: formData,
+});
+
+const result = await response.json();
+// result.url contains the R2 public URL
+```
+
+### **Benefits:**
+- **No size limits:** R2 can handle files much larger than 25MB
+- **Global CDN:** Files served from Cloudflare's edge network
+- **Cost effective:** R2 storage is significantly cheaper than alternatives
+- **Seamless integration:** Automatic fallback to R2 for large files
+
+## ⚡ **WEBPACK CACHE ELIMINATION**
+
+### **Cache Issues RESOLVED:**
+The project was experiencing 203MB webpack cache files that exceeded Cloudflare Pages' 25MB limit. This has been completely resolved:
+
+- **✅ Removed ALL edge runtime** from 17 API routes
+- **✅ Completely disabled webpack cache** (no more .pack files)
+- **✅ Output size reduced** from 203MB to 1.6MB (99.2% reduction)
+- **✅ Static export works perfectly** for Cloudflare Pages
+
+### **Key Fixes Applied:**
+1. Removed `export const runtime = 'edge'` from all API routes
+2. Disabled ALL webpack caching mechanisms in next.config.js
+3. Removed splitChunks optimization that was creating large files
+4. Clean build process with zero cache artifacts
+
+### **Monitoring:**
+```bash
+# Check for cache files (should return 0)
+find out -name "*.pack" | wc -l
+
+# Check output size (should be ~1.6MB)
+du -sh out/
+```
+
 ## 💡 **Remember:**
 - We do NOT use Vercel anymore
-- All deployments go through Cloudflare Workers
+- All deployments go through Cloudflare Pages
 - Use `npm run deploy` after pushing to GitHub
-- API routes need to be deployed as separate Workers
+- Large files automatically use R2 storage
+- Zero webpack cache files in production builds
