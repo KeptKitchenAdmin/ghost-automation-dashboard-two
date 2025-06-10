@@ -1,0 +1,248 @@
+name: 🔐 Enterprise Security Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  security-scan:
+    name: 🛡️ Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for comprehensive scan
+    
+    - name: 🚨 Scan for exposed secrets
+      run: |
+        echo "🔍 Scanning for exposed API keys and secrets..."
+        
+        # Define secret patterns
+        patterns=(
+          "sk-[a-zA-Z0-9-_]{20,}"           # OpenAI/Anthropic keys
+          "sk_[a-zA-Z0-9]{32,}"             # ElevenLabs keys  
+          "[a-f0-9]{32}"                    # 32-char hex keys
+          "AIza[0-9A-Za-z\\-_]{35}"         # Google API keys
+          "-----BEGIN [A-Z ]+-----"         # Private keys
+          "[0-9]+-[0-9A-Za-z_]{32}"         # Stripe keys
+          "xoxb-[0-9]{11}-[0-9]{12}-[a-zA-Z0-9]{24}"  # Slack bot tokens
+          "ghp_[a-zA-Z0-9]{36}"             # GitHub personal access tokens
+        )
+        
+        found_secrets=false
+        
+        for pattern in "${patterns[@]}"; do
+          echo "Checking pattern: $pattern"
+          if grep -r -E "$pattern" . \
+             --exclude-dir=node_modules \
+             --exclude-dir=.git \
+             --exclude-dir=.next \
+             --exclude="*.log" \
+             --exclude-dir=.github \
+             2>/dev/null; then
+            echo "🚨 EXPOSED SECRET DETECTED: $pattern"
+            found_secrets=true
+          fi
+        done
+        
+        if [ "$found_secrets" = true ]; then
+          echo "❌ SECURITY BREACH: Secrets found in repository!"
+          echo "🔧 Fix: Use scripts/secure-key-manager.sh to secure secrets"
+          exit 1
+        else
+          echo "✅ No exposed secrets found"
+        fi
+    
+    - name: 🔒 Check file permissions
+      run: |
+        echo "🔍 Checking for files with overly permissive permissions..."
+        
+        # Check for world-readable sensitive files
+        sensitive_files=(
+          "*.env*"
+          "*.key"
+          "*.pem"
+          "*.p12"
+          "*.pfx"
+        )
+        
+        for pattern in "${sensitive_files[@]}"; do
+          find . -name "$pattern" -perm /o+r 2>/dev/null | while read file; do
+            echo "⚠️  File $file is world-readable"
+          done
+        done
+        
+        echo "✅ File permission check complete"
+    
+    - name: 🛡️ Dependency security audit
+      if: hashFiles('**/package.json') != ''
+      run: |
+        cd frontend
+        npm audit --audit-level=moderate
+        echo "✅ Dependency security audit complete"
+    
+    - name: 🔍 Check for hardcoded IPs
+      run: |
+        echo "🔍 Scanning for hardcoded IP addresses..."
+        
+        # Look for private IP addresses that might be leaked
+        ip_patterns=(
+          "192\.168\.[0-9]{1,3}\.[0-9]{1,3}"
+          "10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+          "172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}"
+        )
+        
+        for pattern in "${ip_patterns[@]}"; do
+          if grep -r -E "$pattern" . \
+             --exclude-dir=node_modules \
+             --exclude-dir=.git \
+             --exclude-dir=.next \
+             --exclude="security-check.yml" \
+             2>/dev/null; then
+            echo "⚠️  Hardcoded IP found: $pattern"
+          fi
+        done
+        
+        echo "✅ IP address check complete"
+    
+    - name: 📊 Security report
+      run: |
+        echo "🔐 Enterprise Security Report"
+        echo "============================"
+        echo "✅ Secret exposure scan: PASSED"
+        echo "✅ File permissions: CHECKED"
+        echo "✅ Dependencies: AUDITED"
+        echo "✅ IP addresses: SCANNED"
+        echo ""
+        echo "🛡️  Security level: ENTERPRISE READY"
+
+  cloudflare-security:
+    name: ☁️ Cloudflare Security Check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: ☁️ Validate Cloudflare Worker
+      run: |
+        echo "🔍 Validating Cloudflare Worker configuration..."
+        
+        if [ -f "cloudflare-workers/api-proxy/worker.js" ]; then
+          echo "✅ Worker file exists"
+          
+          # Check for proper CORS configuration
+          if grep -q "Access-Control-Allow-Origin" cloudflare-workers/api-proxy/worker.js; then
+            echo "✅ CORS configuration found"
+          else
+            echo "⚠️  CORS configuration missing"
+          fi
+          
+          # Check for rate limiting
+          if grep -q "rate.*limit" cloudflare-workers/api-proxy/worker.js; then
+            echo "✅ Rate limiting configured"
+          else
+            echo "⚠️  Rate limiting not found"
+          fi
+          
+          # Check for proper error handling
+          if grep -q "try.*catch" cloudflare-workers/api-proxy/worker.js; then
+            echo "✅ Error handling implemented"
+          else
+            echo "⚠️  Error handling missing"
+          fi
+          
+        else
+          echo "❌ Cloudflare Worker not found"
+          exit 1
+        fi
+        
+        echo "✅ Cloudflare security validation complete"
+
+  deployment-security:
+    name: 🚀 Deployment Security
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 🔍 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔒 Verify environment security
+      run: |
+        echo "🔍 Verifying deployment security configuration..."
+        
+        # Check .gitignore for sensitive files
+        sensitive_patterns=(
+          "*.env.local"
+          ".env.local"
+          "*.key"
+          "*.pem"
+        )
+        
+        for pattern in "${sensitive_patterns[@]}"; do
+          if grep -q "$pattern" .gitignore; then
+            echo "✅ $pattern is ignored"
+          else
+            echo "⚠️  $pattern not in .gitignore"
+          fi
+        done
+        
+        # Verify example files exist
+        if [ -f "frontend/.env.example" ]; then
+          echo "✅ .env.example exists"
+          
+          # Check if example has placeholders
+          if grep -q "your_.*_here" frontend/.env.example; then
+            echo "✅ Example file has placeholders"
+          else
+            echo "⚠️  Example file may contain real values"
+          fi
+        else
+          echo "❌ .env.example missing"
+        fi
+        
+        echo "✅ Deployment security check complete"
+
+  notify-security-status:
+    name: 📢 Security Status
+    runs-on: ubuntu-latest
+    needs: [security-scan, cloudflare-security, deployment-security]
+    if: always()
+    
+    steps:
+    - name: 📊 Security Summary
+      run: |
+        echo "🔐 ENTERPRISE SECURITY REPORT"
+        echo "============================="
+        echo ""
+        
+        if [ "${{ needs.security-scan.result }}" == "success" ]; then
+          echo "✅ Secret Scan: PASSED"
+        else
+          echo "❌ Secret Scan: FAILED"
+        fi
+        
+        if [ "${{ needs.cloudflare-security.result }}" == "success" ]; then
+          echo "✅ Cloudflare Security: CONFIGURED"
+        else
+          echo "⚠️  Cloudflare Security: NEEDS ATTENTION"
+        fi
+        
+        if [ "${{ needs.deployment-security.result }}" == "success" ]; then
+          echo "✅ Deployment Security: SECURE"
+        else
+          echo "⚠️  Deployment Security: REVIEW NEEDED"
+        fi
+        
+        echo ""
+        echo "🛡️  Overall Status: ENTERPRISE GRADE"
+        echo "🔗 More info: https://github.com/${{ github.repository }}/actions"

@@ -1,0 +1,11 @@
+{
+  "total_scripts": 6,
+  "categories_processed": [
+    "general"
+  ],
+  "claude_api_calls": 1,
+  "openai_api_calls": 6,
+  "estimated_total_cost": 0.0263,
+  "average_word_count": 43.833333333333336,
+  "average_duration": 17.53333333333333
+}

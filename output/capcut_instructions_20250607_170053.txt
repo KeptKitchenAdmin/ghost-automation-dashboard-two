@@ -1,0 +1,65 @@
+
+🎬 CAPCUT ASSEMBLY INSTRUCTIONS
+==============================
+
+📱 PROJECT SETUP:
+1. Open CapCut, create new project (1080x1920 vertical)
+2. Set timeline to 30 seconds
+3. Import your 3 MKUltra document images
+
+🎵 MUSIC SELECTION:
+- Search CapCut music library for "suspense" or "mystery"
+- Choose: "Dark Mystery", "Conspiracy Theory", or "Investigation Theme"
+- Volume: 60-70% (voice/text more important than music)
+
+🖼️ VISUAL ASSEMBLY:
+
+SEGMENT 1 (0-3 seconds) - THE HOOK:
+• Add first document image (most shocking)
+• Effect: Zoom from 1.0x to 1.3x scale
+• Focus point: Most scandalous document detail
+• Text: "DECLASSIFIED: You weren't supposed to see this..."
+• Font: Impact Bold, Size 48px, White with black stroke
+
+SEGMENT 2 (3-8 seconds) - REVELATION:
+• Quick transition to second document
+• Effect: Quick zoom transition 
+• Text: "$2.4 million government experiment"
+• Font: Arial Black, Size 42px, Yellow with red stroke
+• Timing: Text appears at 3.5 seconds
+
+SEGMENT 3 (8-18 seconds) - EVIDENCE BARRAGE:
+• Rapid cuts between all 3 documents (3-4 seconds each)
+• Text overlays: "CLASSIFIED FOR 50 YEARS" → "300+ HUMAN SUBJECTS" → "ILLEGAL EXPERIMENTS"
+• Font: Courier New, Size 36px, Red with black stroke
+• Effect: Quick zoom on different document sections
+
+SEGMENT 4 (18-25 seconds) - CLIMAX:
+• Use most damning document 
+• Effect: Slow dramatic zoom (1.0x to 2.5x over 7 seconds)
+• Text: "THIS CHANGES EVERYTHING"
+• Font: Impact Bold, Size 52px, Red with white stroke
+• Animation: Dramatic zoom effect
+
+SEGMENT 5 (25-30 seconds) - ENGAGEMENT:
+• Fade to dark background with text CTAs
+• Text 1: "Follow for more suppressed truths" (Green text)
+• Text 2: "Comment if you already knew this" (White text)  
+• Text 3: "Wait until you see what they did next..." (Yellow pulsing text)
+
+📤 EXPORT SETTINGS:
+• Resolution: 1080x1920 (TikTok vertical)
+• FPS: 30fps
+• Quality: High
+• Format: MP4
+• Captions: Enable auto-captions, review for accuracy
+
+🚨 FINAL CHECKLIST:
+□ First 3 seconds are shocking enough to stop scrolling
+□ Text is readable on mobile screen
+□ Music builds tension throughout
+□ Quick cuts every 2-3 seconds maximum
+□ Strong CTAs at the end
+□ All document details are visible
+
+IF THE FIRST 3 SECONDS DON'T SHOCK YOU, START OVER!

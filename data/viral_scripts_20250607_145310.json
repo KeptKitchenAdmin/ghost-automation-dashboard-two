@@ -1,0 +1,322 @@
+[
+  {
+    "script": {
+      "hook": "\ud83c\udf19 \"Ever wonder how celebrities like Ariana Grande catch those dreamy ZZZs? Well, here\u2019s their secret hack!\"",
+      "problem": "\ud83d\ude29 \"If you\u2019re tossing and turning every night, feeling frustrated and anxious because sleep just won\u2019t come, you\u2019re not alone. That restless mind can ruin your day!\"",
+      "science": "\ud83e\udde0 \"This isn\u2019t just any headband\u2014it uses bone conduction technology! That means it sends soothing sounds directly to your inner ear, blocking out all that annoying noise without those bulky headphones getting in the way.\"",
+      "proof": "\ud83c\udf89 \"Thousands of people have transformed their sleep with this little gadget! Just check out the countless testimonials\u2014we're talking dreams of uninterrupted sleep and waking up feeling refreshed!\"",
+      "cta": "\u23f3 \"Don\u2019t let another sleepless night pass you by! Grab your Bluetooth Sleep Headphones now for just $24.99 and say goodbye to tossing and turning. Click the link and start your journey to sweet dreams tonight!\" --- Feel free to adjust any elements to better fit your style or audience!",
+      "full_script": "\ud83c\udf19 \"Ever wonder how celebrities like Ariana Grande catch those dreamy ZZZs? Well, here\u2019s their secret hack!\" \ud83d\ude29 \"If you\u2019re tossing and turning every night, feeling frustrated and anxious because sleep just won\u2019t come, you\u2019re not alone. That restless mind can ruin your day!\" \ud83e\udde0 \"This isn\u2019t just any headband\u2014it uses bone conduction technology! That means it sends soothing sounds directly to your inner ear, blocking out all that annoying noise without those bulky headphones getting in the way.\" \ud83c\udf89 \"Thousands of people have transformed their sleep with this little gadget! Just check out the countless testimonials\u2014we're talking dreams of uninterrupted sleep and waking up feeling refreshed!\" \u23f3 \"Don\u2019t let another sleepless night pass you by! Grab your Bluetooth Sleep Headphones now for just $24.99 and say goodbye to tossing and turning. Click the link and start your journey to sweet dreams tonight!\" --- Feel free to adjust any elements to better fit your style or audience!"
+    },
+    "product": {
+      "name": "Bluetooth Sleep Headphones Wireless Headband",
+      "price": "$24.99",
+      "sales": "12,000+ sold",
+      "rating": "4.7/5",
+      "commission": "25%",
+      "description": "Comfortable headband with built-in bluetooth speakers for sleep"
+    },
+    "word_count": 157,
+    "duration_estimate": 62.8,
+    "claude_insights": {
+      "pain_point": "Difficulty sleeping and lack of quality sleep due to noisy environments or insomnia",
+      "emotional_trigger": "Feeling exhausted and fatigued from poor sleep",
+      "scientific_mechanism": "The headband utilizes bone conduction technology to transmit audio directly to the inner ear, allowing the user to listen to soothing sounds or white noise without disruptive external noise or the need for bulky over-ear headphones that can interfere with sleep."
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:53:09.587268",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0157
+    },
+    "viral_score": 85
+  },
+  {
+    "script": {
+      "hook": "\ud83d\udea8 3 shocking mistakes you're making that are wasting your time every day! \ud83d\udea8",
+      "problem": "Let\u2019s be real\u2014is your phone charging cable a tangled mess on your dashboard? \ud83d\ude29 It\u2019s not just annoying; it\u2019s a safety hazard! Juggling those cords while driving can lead to accidents, and who\u2019s got time for that?",
+      "science": "\ud83d\udd2c But what if I told you there\u2019s a solution? Our Collagen Peptides Powder\u2014not just for glowing skin\u2014but it\u2019s paired with a magnetic design! It holds your phone securely while fast-charging, so you can focus on the road. Science backs it up; it minimizes distractions and keeps your device juiced up!",
+      "proof": "\ud83d\udcc8 Users are raving about it! They\u2019ve not only noticed a smoother drive but also less stress when they're on the go. Feel the difference! Just check the reviews!",
+      "cta": "\ud83c\udf89 Ready to ditch those tangled cords and drive smarter? Click the link in my bio to grab yours for $39.99 now! Your dashboard will thank you! \ud83d\ude97\u2728",
+      "full_script": "\ud83d\udea8 3 shocking mistakes you're making that are wasting your time every day! \ud83d\udea8 Let\u2019s be real\u2014is your phone charging cable a tangled mess on your dashboard? \ud83d\ude29 It\u2019s not just annoying; it\u2019s a safety hazard! Juggling those cords while driving can lead to accidents, and who\u2019s got time for that? \ud83d\udd2c But what if I told you there\u2019s a solution? Our Collagen Peptides Powder\u2014not just for glowing skin\u2014but it\u2019s paired with a magnetic design! It holds your phone securely while fast-charging, so you can focus on the road. Science backs it up; it minimizes distractions and keeps your device juiced up! \ud83d\udcc8 Users are raving about it! They\u2019ve not only noticed a smoother drive but also less stress when they're on the go. Feel the difference! Just check the reviews! \ud83c\udf89 Ready to ditch those tangled cords and drive smarter? Click the link in my bio to grab yours for $39.99 now! Your dashboard will thank you! \ud83d\ude97\u2728"
+    },
+    "product": {
+      "name": "Collagen Peptides Powder Anti-Aging Supplement",
+      "price": "$39.99",
+      "sales": "15,000+ sold",
+      "rating": "4.9/5",
+      "commission": "30%",
+      "description": "Hydrolyzed collagen powder for skin health and anti-aging"
+    },
+    "word_count": 159,
+    "duration_estimate": 63.6,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:52:42.413439",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0159
+    },
+    "viral_score": 79
+  },
+  {
+    "script": {
+      "hook": "Hey, do you make these 3 shocking mistakes that could be costing you precious minutes every day while driving? \ud83d\ude97\ud83d\udca8",
+      "problem": "If you're still wrestling with tangled cords and a cluttered dashboard, I feel your pain! It\u2019s so annoying when all you want to do is check your GPS, but instead, you\u2019re stuck dealing with a mess. \ud83d\ude29",
+      "science": "But here\u2019s the secret: our Wireless Magnetic Car Phone Mount with Fast Charging harnesses powerful magnets and cutting-edge tech to securely hold your phone while it charges lightning-fast. That means fewer distractions and more focus on the road! \ud83d\udd0b\u26a1",
+      "proof": "Just check out these reviews! People are raving about how it changed their driving experience\u2014no more fumbling with cords or low battery alerts! \ud83d\udcf1\u2728",
+      "cta": "So why wait? Upgrade your drive now for just $19.99! Click the link to grab yours today and say goodbye to chaos in your car! \ud83d\ude80\u2b07\ufe0f",
+      "full_script": "Hey, do you make these 3 shocking mistakes that could be costing you precious minutes every day while driving? \ud83d\ude97\ud83d\udca8 If you're still wrestling with tangled cords and a cluttered dashboard, I feel your pain! It\u2019s so annoying when all you want to do is check your GPS, but instead, you\u2019re stuck dealing with a mess. \ud83d\ude29 But here\u2019s the secret: our Wireless Magnetic Car Phone Mount with Fast Charging harnesses powerful magnets and cutting-edge tech to securely hold your phone while it charges lightning-fast. That means fewer distractions and more focus on the road! \ud83d\udd0b\u26a1 Just check out these reviews! People are raving about how it changed their driving experience\u2014no more fumbling with cords or low battery alerts! \ud83d\udcf1\u2728 So why wait? Upgrade your drive now for just $19.99! Click the link to grab yours today and say goodbye to chaos in your car! \ud83d\ude80\u2b07\ufe0f"
+    },
+    "product": {
+      "name": "Wireless Magnetic Car Phone Mount with Fast Charging",
+      "price": "$19.99",
+      "sales": "25,000+ sold",
+      "rating": "4.8/5",
+      "commission": "20%",
+      "description": "Magnetic car mount with wireless charging for phones"
+    },
+    "word_count": 146,
+    "duration_estimate": 58.4,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:52:22.799950",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0146
+    },
+    "viral_score": 78
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Wireless Magnetic Car Phone Mount with Fast Charging",
+      "price": "$19.99",
+      "sales": "25,000+ sold",
+      "rating": "4.8/5",
+      "commission": "20%",
+      "description": "Magnetic car mount with wireless charging for phones"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:52:18.392136",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "LED Strip Lights RGB Color Changing with Remote",
+      "price": "$15.99",
+      "sales": "18,000+ sold",
+      "rating": "4.6/5",
+      "commission": "22%",
+      "description": "Color changing LED lights for room decoration"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:52:28.076913",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "LED Strip Lights RGB Color Changing with Remote",
+      "price": "$15.99",
+      "sales": "18,000+ sold",
+      "rating": "4.6/5",
+      "commission": "22%",
+      "description": "Color changing LED lights for room decoration"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:52:32.172725",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Collagen Peptides Powder Anti-Aging Supplement",
+      "price": "$39.99",
+      "sales": "15,000+ sold",
+      "rating": "4.9/5",
+      "commission": "30%",
+      "description": "Hydrolyzed collagen powder for skin health and anti-aging"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:52:36.692574",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Electric Kitchen Knife Sharpener Professional",
+      "price": "$29.99",
+      "sales": "8,500+ sold",
+      "rating": "4.5/5",
+      "commission": "18%",
+      "description": "Professional electric knife sharpener for kitchen knives"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:52:51.016204",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Electric Kitchen Knife Sharpener Professional",
+      "price": "$29.99",
+      "sales": "8,500+ sold",
+      "rating": "4.5/5",
+      "commission": "18%",
+      "description": "Professional electric knife sharpener for kitchen knives"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Frustration with managing and charging your phone while driving, leading to safety concerns and decreased productivity.",
+      "emotional_trigger": "Anxiety about distracted driving and fear of accidents",
+      "scientific_mechanism": "The product's magnetic design and fast-charging capabilities are scientifically proven to securely hold your phone in place while quickly replenishing its battery, minimizing distractions and ensuring your device is always ready to use."
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:52:57.568949",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Bluetooth Sleep Headphones Wireless Headband",
+      "price": "$24.99",
+      "sales": "12,000+ sold",
+      "rating": "4.7/5",
+      "commission": "25%",
+      "description": "Comfortable headband with built-in bluetooth speakers for sleep"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Difficulty sleeping and lack of quality sleep due to noisy environments or insomnia",
+      "emotional_trigger": "Feeling exhausted and fatigued from poor sleep",
+      "scientific_mechanism": "The headband utilizes bone conduction technology to transmit audio directly to the inner ear, allowing the user to listen to soothing sounds or white noise without disruptive external noise or the need for bulky over-ear headphones that can interfere with sleep."
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:53:04.741908",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  }
+]

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Test</title>
+    <style>
+        :root {
+            --luxury-500: #800020;
+            --luxury-600: #66001a;
+        }
+        .test-maroon {
+            background: var(--luxury-500);
+            color: white;
+            padding: 20px;
+            margin: 10px;
+            font-size: 24px;
+        }
+        .test-gradient {
+            background: linear-gradient(to right, var(--luxury-600), var(--luxury-500));
+            color: white;
+            padding: 20px;
+            margin: 10px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-maroon">This should be MAROON (#800020)</div>
+    <div class="test-gradient">This should be MAROON GRADIENT</div>
+    <p>If you see maroon colors above, the CSS is working. If not, there's a deployment issue.</p>
+</body>
+</html>

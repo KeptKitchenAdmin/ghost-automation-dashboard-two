@@ -1,0 +1,200 @@
+[
+  {
+    "script": {
+      "hook": "\ud83c\udf89 Discover the game-changing Air Fryer that makes cooking a breeze! \ud83d\ude80",
+      "problem": "Ever found yourself hangry, scrolling through delivery apps because dinner feels like a chore? \ud83d\ude29 Or are you tired of juggling pots and pans while your family is waiting?",
+      "science": "With our Air Fryer\u2019s fast wireless technology, getting that perfect meal is as simple as a click! It efficiently transfers heat, so your food cooks quicker\u2014hello crispy fries in just 15 minutes! \ud83c\udf5f\u2728",
+      "proof": "Don\u2019t just take my word for it! Check out these raving reviews\u2014people are saying it\u2019s transformed their weeknight dinners! One mom even said cooking has turned from chaos to calm in her house. \ud83d\ude4c",
+      "cta": "You don\u2019t want to miss out! Grab your Air Fryer today for just $89.99\u2014limited stock available! Click the link before it's too late and elevate your kitchen game! \ud83d\udd25\ud83d\udc69\u200d\ud83c\udf73",
+      "full_script": "\ud83c\udf89 Discover the game-changing Air Fryer that makes cooking a breeze! \ud83d\ude80 Ever found yourself hangry, scrolling through delivery apps because dinner feels like a chore? \ud83d\ude29 Or are you tired of juggling pots and pans while your family is waiting? With our Air Fryer\u2019s fast wireless technology, getting that perfect meal is as simple as a click! It efficiently transfers heat, so your food cooks quicker\u2014hello crispy fries in just 15 minutes! \ud83c\udf5f\u2728 Don\u2019t just take my word for it! Check out these raving reviews\u2014people are saying it\u2019s transformed their weeknight dinners! One mom even said cooking has turned from chaos to calm in her house. \ud83d\ude4c You don\u2019t want to miss out! Grab your Air Fryer today for just $89.99\u2014limited stock available! Click the link before it's too late and elevate your kitchen game! \ud83d\udd25\ud83d\udc69\u200d\ud83c\udf73"
+    },
+    "product": {
+      "name": "Air Fryer Kitchen Cooking Appliance 6-Quart",
+      "price": "$89.99",
+      "sales": "8,500+ sold",
+      "rating": "4.6/5",
+      "commission": "22%",
+      "category": "home_kitchen",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 137,
+    "duration_estimate": 54.8,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:41:31.157454",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0137
+    },
+    "viral_score": 58
+  },
+  {
+    "script": {
+      "hook": "\ud83d\ude31 \u201cWait",
+      "problem": "We\u2019ve all been there! You\u2019re on the go, trying to get things done, and suddenly\u2014LOW BATTERY! \ud83d\ude29 It\u2019s frustrating, right? You don\u2019t have time for that!",
+      "science": "That\u2019s where our Wireless Phone Charger Stand with Fast Charging comes in. \u26a1\ufe0f It uses cutting-edge technology to quickly transfer power\u2014meaning you can juice up your phone in no time! \ud83d\ude80",
+      "proof": "But don\u2019t just take my word for it\u2014check out the hundreds of satisfied users who say it changed their game! One user said they went from \u2018dead\u2019 to \u2018fully charged\u2019 in minutes! \ud83d\udd25",
+      "cta": "Don\u2019t miss out! \ud83c\udfc3\u200d\u2642\ufe0f Grab yours now for only $24.99 before they're gone\u2014trust me, you're going to love the freedom of hassle-free charging! Click the link! \ud83d\udcf2\u2728 --- ### Variation #2 Script for TikTok",
+      "full_script": "\ud83d\ude31 \u201cWait We\u2019ve all been there! You\u2019re on the go, trying to get things done, and suddenly\u2014LOW BATTERY! \ud83d\ude29 It\u2019s frustrating, right? You don\u2019t have time for that! That\u2019s where our Wireless Phone Charger Stand with Fast Charging comes in. \u26a1\ufe0f It uses cutting-edge technology to quickly transfer power\u2014meaning you can juice up your phone in no time! \ud83d\ude80 But don\u2019t just take my word for it\u2014check out the hundreds of satisfied users who say it changed their game! One user said they went from \u2018dead\u2019 to \u2018fully charged\u2019 in minutes! \ud83d\udd25 Don\u2019t miss out! \ud83c\udfc3\u200d\u2642\ufe0f Grab yours now for only $24.99 before they're gone\u2014trust me, you're going to love the freedom of hassle-free charging! Click the link! \ud83d\udcf2\u2728 --- ### Variation #2 Script for TikTok"
+    },
+    "product": {
+      "name": "Wireless Phone Charger Stand with Fast Charging",
+      "price": "$24.99",
+      "sales": "15,000+ sold",
+      "rating": "4.7/5",
+      "commission": "18%",
+      "category": "tech_gadgets",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 126,
+    "duration_estimate": 50.4,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:41:04.249404",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0126
+    },
+    "viral_score": 55
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Wireless Phone Charger Stand with Fast Charging",
+      "price": "$24.99",
+      "sales": "15,000+ sold",
+      "rating": "4.7/5",
+      "commission": "18%",
+      "category": "tech_gadgets",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:40:59.660710",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Anti-Aging Vitamin C Brightening Serum",
+      "price": "$29.99",
+      "sales": "12,000+ sold",
+      "rating": "4.8/5",
+      "commission": "25%",
+      "category": "beauty_skincare",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:41:09.880288",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Anti-Aging Vitamin C Brightening Serum",
+      "price": "$29.99",
+      "sales": "12,000+ sold",
+      "rating": "4.8/5",
+      "commission": "25%",
+      "category": "beauty_skincare",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 2,
+    "generated_at": "2025-06-07T14:41:14.899263",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  },
+  {
+    "script": {
+      "hook": "",
+      "problem": "",
+      "science": "",
+      "proof": "",
+      "cta": "",
+      "full_script": ""
+    },
+    "product": {
+      "name": "Air Fryer Kitchen Cooking Appliance 6-Quart",
+      "price": "$89.99",
+      "sales": "8,500+ sold",
+      "rating": "4.6/5",
+      "commission": "22%",
+      "category": "home_kitchen",
+      "source": "demo_fastmoss"
+    },
+    "word_count": 0,
+    "duration_estimate": 0.0,
+    "claude_insights": {
+      "pain_point": "Inconvenience and frustration from low battery on the go",
+      "emotional_trigger": "Fear of being disconnected or unreachable",
+      "scientific_mechanism": "Fast wireless charging technology that efficiently transfers power to quickly replenish battery life"
+    },
+    "variation_number": 1,
+    "generated_at": "2025-06-07T14:41:27.011671",
+    "cost_efficiency": {
+      "model_used": "gpt-4o-mini",
+      "estimated_cost": 0.0
+    },
+    "viral_score": 45
+  }
+]

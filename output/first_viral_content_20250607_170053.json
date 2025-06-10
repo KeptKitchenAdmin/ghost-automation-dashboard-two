@@ -1,0 +1,93 @@
+{
+  "status": "0 FOLLOWERS - AGGRESSIVE GROWTH MODE",
+  "category": "government_experiments",
+  "topic": "MKUltra Mind Control Program",
+  "shock_factor": "10/10 - MAXIMUM VIRAL POTENTIAL",
+  "viral_potential": "EXTREME - Truth seekers will share this",
+  "hook": {
+    "text": "DECLASSIFIED: You weren't supposed to see this...",
+    "shock_statistic": "$2.4 million government experiment",
+    "emotional_trigger": "What they did to innocent people will haunt you...",
+    "timing": "CRITICAL: Must grab attention in first 2 seconds"
+  },
+  "document_images_needed": [
+    "1. Vintage CIA letterhead document with 'TOP SECRET - MKUltra' header, typewriter font, redacted black bars, aged paper",
+    "2. Medical experiment chart showing psychological test results on human subjects, clinical data, handwritten notes",
+    "3. Declassified government memo with subject numbers, mind control experiment details, official stamps"
+  ],
+  "capcut_timeline": {
+    "0-3_seconds": {
+      "purpose": "HOOK - GRAB ATTENTION",
+      "visual": "Most shocking MKUltra document with dramatic zoom",
+      "text_overlay": "DECLASSIFIED: You weren't supposed to see this...",
+      "text_style": "White text, black outline, Impact font",
+      "music": "Suspenseful buildup",
+      "critical": "If this doesn't shock them in 2 seconds, they scroll away"
+    },
+    "3-8_seconds": {
+      "purpose": "REVELATION - BUILD TENSION",
+      "visual": "Quick transition to experiment data document",
+      "text_overlay": "$2.4 million government experiment",
+      "text_style": "Yellow text, dramatic zoom animation",
+      "music": "Continue building suspense",
+      "effect": "Zoom focus on most shocking details"
+    },
+    "8-18_seconds": {
+      "purpose": "EVIDENCE BARRAGE - OVERWHELM WITH PROOF",
+      "visual": "Rapid cuts between documents (2-3 seconds each)",
+      "text_overlays": [
+        "CLASSIFIED FOR 50 YEARS",
+        "300+ HUMAN SUBJECTS",
+        "ILLEGAL EXPERIMENTS"
+      ],
+      "text_style": "Red text for maximum impact",
+      "music": "Dramatic reveal with beat sync",
+      "pacing": "Quick cuts maintain attention"
+    },
+    "18-25_seconds": {
+      "purpose": "CLIMAX - EMOTIONAL PEAK",
+      "visual": "Most damning evidence with slow dramatic zoom",
+      "text_overlay": "THIS CHANGES EVERYTHING",
+      "text_style": "Large red text with dramatic animation",
+      "music": "Peak moment with brief silence for impact",
+      "effect": "Slow zoom on most scandalous document section"
+    },
+    "25-30_seconds": {
+      "purpose": "ENGAGEMENT HOOK - CONVERT TO FOLLOWERS",
+      "visual": "Fade to CTA graphics",
+      "text_overlays": [
+        "Follow for more suppressed truths",
+        "Comment if you already knew this",
+        "Wait until you see what they did next..."
+      ],
+      "music": "Cliffhanger fade out",
+      "critical": "This converts viewers to followers"
+    }
+  },
+  "engagement_elements": {
+    "comment_farming": "Comment if you already knew this",
+    "follow_cta": "Follow for more suppressed truths",
+    "urgency_creator": "They keep trying to delete this",
+    "cliffhanger": "Wait until you see what they did next...",
+    "shareability": "Save this before it gets removed"
+  },
+  "posting_strategy": {
+    "hashtags": [
+      "#mkultra",
+      "#declassified",
+      "#conspiracy",
+      "#truth",
+      "#government",
+      "#mindcontrol",
+      "#cia",
+      "#experiments"
+    ],
+    "caption": "DECLASSIFIED: The $2.4M government experiment they don't want you to know about... \ud83e\udd2f Follow for more suppressed truths",
+    "optimal_times": [
+      "7-9 AM",
+      "12-2 PM",
+      "7-9 PM"
+    ],
+    "frequency": "3 posts per day for rapid growth"
+  }
+}
