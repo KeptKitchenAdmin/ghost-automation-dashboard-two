@@ -8,33 +8,37 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   trailingSlash: true,
-  // Completely disable webpack cache to prevent large .pack files
+  // COMPLETELY disable webpack cache to prevent ANY .pack files
   webpack: (config, { dev, isServer }) => {
-    if (!dev) {
-      // Disable all forms of caching
+    // Disable ALL caching regardless of environment
+    config.cache = false;
+    
+    // Disable filesystem cache completely
+    if (config.cache && typeof config.cache === 'object') {
       config.cache = false;
-      
-      // Disable persistent cache
-      if (config.infrastructureLogging) {
-        config.infrastructureLogging.level = 'error';
-      }
-      
-      // Optimize chunk sizes for Cloudflare
-      if (config.optimization) {
-        config.optimization.splitChunks = {
-          chunks: 'all',
-          maxSize: 244000, // ~240KB chunks (well under 25MB limit)
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-              maxSize: 244000,
-            },
-          },
-        };
-      }
     }
+    
+    // Remove any cache-related plugins
+    if (config.plugins) {
+      config.plugins = config.plugins.filter(plugin => 
+        !plugin.constructor.name.includes('Cache')
+      );
+    }
+    
+    // Disable optimization cache
+    if (config.optimization) {
+      config.optimization.moduleIds = 'deterministic';
+      config.optimization.chunkIds = 'deterministic';
+      // Remove splitChunks to prevent large vendor chunks
+      delete config.optimization.splitChunks;
+    }
+    
+    // Ensure no cache directories are created
+    config.infrastructureLogging = {
+      level: 'error',
+      debug: false
+    };
+    
     return config;
   },
 }

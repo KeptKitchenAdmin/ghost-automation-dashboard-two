@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from 'next/server'
 import { viralScriptGenerator } from '../../../../lib/modules/viral-script-generator'
