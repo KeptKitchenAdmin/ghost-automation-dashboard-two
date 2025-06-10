@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export', // Enable static export for Cloudflare Pages
   images: {
     unoptimized: true,
   },
@@ -7,10 +8,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   trailingSlash: true,
-  // Cloudflare Pages with @cloudflare/next-on-pages
-  experimental: {
-    runtime: 'edge',
-  },
   // Completely disable webpack cache to prevent large .pack files
   webpack: (config, { dev, isServer }) => {
     if (!dev) {
