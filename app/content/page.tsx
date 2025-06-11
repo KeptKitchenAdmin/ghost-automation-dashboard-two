@@ -2,253 +2,211 @@
 
 import React, { useState, useEffect } from 'react'
 import { 
-  Video, 
-  Crown, 
-  Zap, 
-  Play, 
-  MoreHorizontal,
   TrendingUp,
-  Eye,
-  Heart,
-  MessageCircle,
-  Share,
-  Plus,
-  Filter,
-  Clock,
-  CheckCircle,
-  Settings,
-  Download,
-  Upload,
-  Bot,
-  Image as ImageIcon,
-  Users,
-  Sparkles,
-  Send
+  ChevronDown,
+  ChevronUp,
+  Settings
 } from 'lucide-react'
 import { RealContentGenerator } from '@/components/RealContentGenerator'
 
-interface ContentItem {
-  id: string
-  title: string
-  type: 'product_review' | 'suppressed_science' | 'lifestyle_hack' | 'trend_analysis'
-  tier: 'heygen_human' | 'image_montage'
-  status: 'analyzing' | 'generating' | 'ready_to_post' | 'posted' | 'viral'
-  priority: 'urgent' | 'high' | 'medium' | 'low'
-  views?: number
-  engagement?: number
-  revenue?: number
-  viral_score: number
-  revenue_potential: number
-  expected_roi: number
-  hook: string
-  target_audience: string
-  hashtags: string[]
-  thumbnail?: string
-  video_url?: string
-  script_outline?: string[]
-  publishedAt?: Date
-  generatedAt?: Date
-  estimatedCompletionTime?: string
-}
-
 export default function ContentHub() {
-  const [activeTab, setActiveTab] = useState<'ready_to_post' | 'generating' | 'analyzing' | 'posted'>('ready_to_post')
-  const [contentItems, setContentItems] = useState<ContentItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [followerCount, setFollowerCount] = useState(0)
+  const [showStrategy, setShowStrategy] = useState(false)
+  const [showTips, setShowTips] = useState(false)
+  const [showSchedule, setShowSchedule] = useState(false)
   
   useEffect(() => {
-    loadContentPipeline()
+    const savedCount = localStorage.getItem('followerCount')
+    if (savedCount) setFollowerCount(parseInt(savedCount))
   }, [])
 
-  const loadContentPipeline = async () => {
-    setLoading(true)
-    try {
-      // Load content from your smart content generation API
-      const response = await fetch('/api/content/generate?limit=10')
-      if (response.ok) {
-        const data = await response.json()
-        // Transform API recommendations into content items with pipeline stages
-        const transformedContent = data.data.recommendations.map((rec: any, index: number) => ({
-          id: rec.content_id,
-          title: rec.title,
-          type: rec.content_type,
-          tier: rec.recommended_tier,
-          status: index < 3 ? 'ready_to_post' : index < 6 ? 'generating' : 'analyzing',
-          priority: rec.priority,
-          viral_score: rec.viral_score,
-          revenue_potential: rec.revenue_potential,
-          expected_roi: rec.expected_roi,
-          hook: rec.hook,
-          target_audience: rec.target_audience,
-          hashtags: rec.hashtags,
-          script_outline: rec.script_outline,
-          generatedAt: index < 3 ? new Date(Date.now() - Math.random() * 3600000) : undefined,
-          estimatedCompletionTime: index >= 3 ? `${Math.floor(Math.random() * 3 + 1)} hours` : undefined,
-          video_url: index < 3 ? `/content/video_${rec.content_id}.mp4` : undefined
-        }))
-        setContentItems(transformedContent)
-      } else {
-        // Fallback with mock pipeline data
-        setContentItems(getMockPipelineContent())
-      }
-    } catch (error) {
-      console.error('Failed to load content pipeline:', error)
-      setContentItems(getMockPipelineContent())
-    }
-    setLoading(false)
-  }
-
-  const getMockPipelineContent = (): ContentItem[] => [
-    {
-      id: 'ready_001',
-      title: 'I Used This Viral LED Face Mask for 30 Days - Shocking Results',
-      type: 'product_review',
-      tier: 'heygen_human',
-      status: 'ready_to_post',
-      priority: 'urgent',
-      viral_score: 92,
-      revenue_potential: 280,
-      expected_roi: 84,
-      hook: 'Everyone said this LED mask was just a scam, but after 30 days...',
-      target_audience: 'Women 18-35, skincare enthusiasts',
-      hashtags: ['#tiktokshop', '#skincare', '#antiaging', '#ledmask', '#beforeandafter'],
-      video_url: '/content/led_mask_review.mp4',
-      generatedAt: new Date(Date.now() - 1800000), // 30 min ago
-      script_outline: ['Hook: Skeptical about LED masks', 'Before: Show skin concerns', 'Demo: Using the mask', 'After: Results', 'CTA: Discount code']
-    },
-    {
-      id: 'ready_002',
-      title: 'The Government Studied Starvation Psychology on Americans for 40 Years',
-      type: 'suppressed_science',
-      tier: 'heygen_human',
-      status: 'ready_to_post',
-      priority: 'high',
-      viral_score: 95,
-      revenue_potential: 0,
-      expected_roi: 75,
-      hook: 'The government did starvation experiments on Americans and this explains why every diet fails...',
-      target_audience: 'Truth-seekers, health-conscious, diet culture critics',
-      hashtags: ['#suppressed', '#dietculture', '#truth', '#psychology', '#mindblown'],
-      video_url: '/content/starvation_study.mp4',
-      generatedAt: new Date(Date.now() - 3600000), // 1 hour ago
-      script_outline: ['Hook: Government starvation study', 'Experiment details', 'Psychological damage', 'Modern impact', 'CTA: Follow for truth']
-    },
-    {
-      id: 'ready_003',
-      title: 'This Smart Water Bottle Actually Changed My Health',
-      type: 'product_review',
-      tier: 'heygen_human',
-      status: 'ready_to_post',
-      priority: 'high',
-      viral_score: 88,
-      revenue_potential: 150,
-      expected_roi: 45,
-      hook: 'I was dehydrated for years until I got this smart water bottle',
-      target_audience: 'Health-conscious 20-40, tech lovers',
-      hashtags: ['#smartwater', '#healthtech', '#hydration', '#wellness', '#tiktokshop'],
-      video_url: '/content/smart_bottle.mp4',
-      generatedAt: new Date(Date.now() - 2700000), // 45 min ago
-    },
-    {
-      id: 'gen_001',
-      title: 'BMI Was Invented by an Astronomer, Not a Doctor',
-      type: 'suppressed_science',
-      tier: 'heygen_human',
-      status: 'generating',
-      priority: 'high',
-      viral_score: 85,
-      revenue_potential: 0,
-      expected_roi: 60,
-      hook: 'Your doctor uses BMI to judge your health but it was invented by an astronomer in 1830...',
-      target_audience: 'Body positive advocates, health-conscious',
-      hashtags: ['#bmi', '#bodypositive', '#medicallies', '#health', '#truth'],
-      estimatedCompletionTime: '2 hours'
-    },
-    {
-      id: 'gen_002',
-      title: 'This Declassified Document Proves Media Control Since 1950s',
-      type: 'trend_analysis',
-      tier: 'image_montage',
-      status: 'generating',
-      priority: 'medium',
-      viral_score: 78,
-      revenue_potential: 0,
-      expected_roi: 25,
-      hook: 'This declassified CIA document shows they\'ve been controlling the news since the 1950s...',
-      target_audience: 'Conspiracy theorists, media critics',
-      hashtags: ['#declassified', '#cia', '#media', '#conspiracy', '#truth'],
-      estimatedCompletionTime: '1 hour'
-    },
-    {
-      id: 'analyze_001',
-      title: 'Posture Corrector Belt Review',
-      type: 'product_review',
-      tier: 'heygen_human',
-      status: 'analyzing',
-      priority: 'medium',
-      viral_score: 82,
-      revenue_potential: 200,
-      expected_roi: 50,
-      hook: 'This invisible posture belt fixed my back pain in 2 weeks',
-      target_audience: 'Desk workers, students, back pain sufferers',
-      hashtags: ['#posture', '#backpain', '#health', '#productivity', '#tiktokshop'],
-      estimatedCompletionTime: '3 hours'
-    }
-  ]
-
-  const filteredContent = contentItems.filter(item => {
-    if (activeTab === 'posted') return item.status === 'posted' || item.status === 'viral'
-    return item.status === activeTab
-  })
-
-  const getTabCounts = () => {
-    return {
-      ready_to_post: contentItems.filter(item => item.status === 'ready_to_post').length,
-      generating: contentItems.filter(item => item.status === 'generating').length,
-      analyzing: contentItems.filter(item => item.status === 'analyzing').length,
-      posted: contentItems.filter(item => item.status === 'posted' || item.status === 'viral').length
-    }
-  }
-
-  const tabCounts = getTabCounts()
-
   return (
-    <div style={{backgroundColor: 'var(--luxury-white)', minHeight: '100vh'}}>
-      <div className="luxury-container">
-        
-        {/* Header Section */}
-        <div className="text-center luxury-section">
-          <h1 className="luxury-heading-xl">
-            Content Studio
-          </h1>
-          <p className="luxury-body-muted max-w-2xl mx-auto">
-            Generate high-converting viral content with intelligent A/B testing and audience optimization
-          </p>
-        </div>
-        
-        <div className="flex items-center justify-between luxury-section">
-          <div></div>
-          <div className="flex items-center gap-4">
+    <div className="luxury-container luxury-padding">
+      {/* Clean Header */}
+      <div className="luxury-card mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="luxury-heading-xl mb-2">Content Generation Hub</h1>
+            <p className="luxury-body-muted">
+              Generate viral content optimized for TikTok growth
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="luxury-body-small text-warm-gray-500 mb-1">Followers</div>
+            <div className="luxury-heading-lg text-blue-600">{followerCount.toLocaleString()}</div>
             <button 
-              onClick={() => window.location.href = '/shadowban-safe'}
-              className="luxury-button-secondary"
+              onClick={() => {
+                const newCount = prompt('Update follower count:', followerCount.toString())
+                if (newCount && !isNaN(parseInt(newCount))) {
+                  const count = parseInt(newCount)
+                  setFollowerCount(count)
+                  localStorage.setItem('followerCount', count.toString())
+                }
+              }}
+              className="luxury-button-secondary text-xs mt-1"
             >
-              Advanced Options
-            </button>
-            <button 
-              onClick={loadContentPipeline}
-              className="luxury-button-primary"
-            >
-              Generate Content
+              Update
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Content Generator */}
-        <div className="luxury-section">
-          <RealContentGenerator />
-        </div>
+      {/* Growth Strategy Dropdown */}
+      <div className="luxury-card mb-6">
+        <button
+          onClick={() => setShowStrategy(!showStrategy)}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <TrendingUp className="w-5 h-5 text-blue-600" />
+            <span className="luxury-heading-md">Growth Strategy</span>
+          </div>
+          {showStrategy ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
         
+        {showStrategy && (
+          <div className="border-t border-gray-200 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <h4 className="font-medium mb-2">Phase 1: 0-100 Followers</h4>
+                <p className="text-sm text-gray-600">Post 3x daily, focus on conspiracy content, no monetization</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <h4 className="font-medium mb-2">Phase 2: 100-500 Followers</h4>
+                <p className="text-sm text-gray-600">Increase to 4x daily, mix trending topics, build authority</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg">
+                <h4 className="font-medium mb-2">Phase 3: 500-1000 Followers</h4>
+                <p className="text-sm text-gray-600">Maintain consistency, test product mentions, prepare monetization</p>
+              </div>
+            </div>
+            <div className="flex justify-between items-center text-sm mb-2">
+              <span>Progress to 1K followers</span>
+              <span className="font-bold">{Math.round((followerCount / 1000) * 100)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all"
+                style={{ width: `${Math.min((followerCount / 1000) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Content Tips Dropdown */}
+      <div className="luxury-card mb-6">
+        <button
+          onClick={() => setShowTips(!showTips)}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <Settings className="w-5 h-5 text-green-600" />
+            <span className="luxury-heading-md">Best Practices</span>
+          </div>
+          {showTips ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+        
+        {showTips && (
+          <div className="border-t border-gray-200 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium mb-3">Top Viral Hook Patterns</h4>
+                <div className="space-y-2">
+                  <div className="p-2 bg-gray-50 rounded text-sm">
+                    <strong>Government Money:</strong> "The government spent $2.4M studying this"
+                  </div>
+                  <div className="p-2 bg-gray-50 rounded text-sm">
+                    <strong>Leaked Files:</strong> "LEAKED: 1973 CIA files finally exposed"
+                  </div>
+                  <div className="p-2 bg-gray-50 rounded text-sm">
+                    <strong>Deleted Content:</strong> "They deleted this 3 times from the internet"
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-3">Content Categories</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between p-2 bg-gray-50 rounded text-sm">
+                    <span>Declassified Documents</span>
+                    <span className="font-bold text-green-600">95% viral</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-gray-50 rounded text-sm">
+                    <span>Suppressed Science</span>
+                    <span className="font-bold text-green-600">92% viral</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-gray-50 rounded text-sm">
+                    <span>Psychology Secrets</span>
+                    <span className="font-bold text-green-600">90% viral</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Posting Schedule Dropdown */}
+      <div className="luxury-card mb-6">
+        <button
+          onClick={() => setShowSchedule(!showSchedule)}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="luxury-heading-md">Posting Schedule</span>
+          </div>
+          {showSchedule ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+        
+        {showSchedule && (
+          <div className="border-t border-gray-200 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium mb-3">Best Posting Times (EST)</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between p-2 bg-orange-50 rounded text-sm">
+                    <span>6:00 AM - 9:00 AM</span>
+                    <span className="font-bold">High engagement</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-orange-50 rounded text-sm">
+                    <span>12:00 PM - 1:00 PM</span>
+                    <span className="font-bold">Medium engagement</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-orange-50 rounded text-sm">
+                    <span>7:00 PM - 9:00 PM</span>
+                    <span className="font-bold">Highest engagement</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-3">Daily Content Mix</h4>
+                <div className="space-y-2">
+                  <div className="p-2 bg-blue-50 rounded text-sm">
+                    <strong>Morning:</strong> Conspiracy or shocking content
+                  </div>
+                  <div className="p-2 bg-blue-50 rounded text-sm">
+                    <strong>Afternoon:</strong> Educational or science content
+                  </div>
+                  <div className="p-2 bg-blue-50 rounded text-sm">
+                    <strong>Evening:</strong> Psychology or personal content
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Generator */}
+      <div className="luxury-card">
+        <div className="mb-6">
+          <h2 className="luxury-heading-lg mb-2">Generate Content</h2>
+          <p className="luxury-body-muted">Create viral content optimized for your growth phase</p>
+        </div>
+        <RealContentGenerator />
       </div>
     </div>
   )
