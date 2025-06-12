@@ -499,8 +499,12 @@ export class ShotstackService {
       total_cost: number;
     };
   }> {
-    if (!this.apiKey) {
-      throw new Error('Shotstack API key not configured');
+    console.log('🔍 API Key Check - this.apiKey:', this.apiKey, 'Length:', this.apiKey ? this.apiKey.length : 0);
+    console.log('🔍 Environment Check - SANDBOX:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? 'EXISTS' : 'MISSING');
+    console.log('🔍 Environment Check - PRODUCTION:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? 'EXISTS' : 'MISSING');
+    
+    if (!this.apiKey || this.apiKey.trim() === '') {
+      throw new Error(`Shotstack API key not configured - Key: "${this.apiKey}", Sandbox env: ${process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? 'SET' : 'MISSING'}, Production env: ${process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? 'SET' : 'MISSING'}`);
     }
 
     console.log('🎬 Starting REAL Shotstack video generation workflow');
