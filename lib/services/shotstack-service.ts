@@ -16,18 +16,21 @@ export class ShotstackService {
   private productionUrl = 'https://api.shotstack.io/v1'
 
   constructor(apiKey?: string, isProduction = false) {
-    // ONLY use NEXT_PUBLIC_ versions - single source, no fallbacks
-    if (isProduction) {
-      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || ''
-      console.log('🔑 Shotstack PRODUCTION mode - API Key:', this.apiKey ? 'SET' : 'UNDEFINED', 'Env var:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? 'EXISTS' : 'MISSING')
-    } else {
-      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || ''
-      console.log('🔑 Shotstack SANDBOX mode - API Key:', this.apiKey ? 'SET' : 'UNDEFINED', 'Env var:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? 'EXISTS' : 'MISSING')
-    }
-    this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
+    console.log('🔍 SHOTSTACK DEBUG:');
+    console.log('isProduction:', isProduction);
+    console.log('NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
+    console.log('NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
     
-    // Debug all environment variables
-    console.log('🔍 All NEXT_PUBLIC env vars:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')))
+    if (isProduction) {
+      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || '';
+    } else {
+      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || '';
+    }
+    
+    console.log('Final apiKey length:', this.apiKey?.length || 0);
+    console.log('Final apiKey (first 10 chars):', this.apiKey?.substring(0, 10) || 'EMPTY');
+    
+    this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
   }
 
   /**
