@@ -58,6 +58,12 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
+      // DEBUG: Show environment variables in error message
+      console.log('🔍 SANDBOX KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
+      console.log('🔍 PRODUCTION KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
+      console.log('🔍 ANTHROPIC KEY:', process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY);
+      console.log('🔍 ALL NEXT_PUBLIC:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
+      
       // Initialize services (NO dynamic imports - all bundled in static build)
       const redditScraper = new RedditScraperService();
       const claudeService = new ClaudeService();
