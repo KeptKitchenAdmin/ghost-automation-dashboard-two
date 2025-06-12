@@ -138,7 +138,7 @@ const VideoGenerator = () => {
             <h1 className="text-3xl font-bold text-white mb-2">Reddit Story Video Generator</h1>
             <p className="text-gray-400">Transform viral Reddit stories into YouTube videos</p>
             <p className="text-xs text-gray-500 mt-2">
-              ✨ Fixed deployment - Unified video generator ready
+              ✨ Environment variables configured - Testing API connectivity
             </p>
           </div>
         </div>

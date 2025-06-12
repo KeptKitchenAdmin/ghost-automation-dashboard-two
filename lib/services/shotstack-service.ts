@@ -16,21 +16,23 @@ export class ShotstackService {
   private productionUrl = 'https://api.shotstack.io/v1'
 
   constructor(apiKey?: string, isProduction = false) {
-    console.log('🔍 SHOTSTACK DEBUG:');
-    console.log('isProduction:', isProduction);
-    console.log('NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
-    console.log('NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
-    
+    // Use NEXT_PUBLIC_ environment variables properly
     if (isProduction) {
       this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || '';
+      this.baseUrl = this.productionUrl;
     } else {
       this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || '';
+      this.baseUrl = this.stagingUrl;
     }
     
-    console.log('Final apiKey length:', this.apiKey?.length || 0);
-    console.log('Final apiKey (first 10 chars):', this.apiKey?.substring(0, 10) || 'EMPTY');
-    
-    this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
+    // Debug logging
+    console.log('🔍 Shotstack constructor:', {
+      isProduction,
+      hasApiKey: !!this.apiKey,
+      keyLength: this.apiKey?.length || 0,
+      sandboxEnvExists: !!process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY,
+      productionEnvExists: !!process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY
+    });
   }
 
   /**
