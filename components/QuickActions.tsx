@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 
 export function QuickActions() {
   const [generating, setGenerating] = useState<string | null>(null)
   const [results, setResults] = useState<{[key: string]: string}>({})
+  const router = useRouter()
 
   const generateProposal = async () => {
     setGenerating('proposal')
@@ -38,6 +40,10 @@ export function QuickActions() {
       }))
       setGenerating(null)
     }, 1000)
+  }
+
+  const openRedditVideoGenerator = () => {
+    router.push('/reddit-automation')
   }
 
   return (
@@ -89,6 +95,20 @@ export function QuickActions() {
             className="luxury-button-secondary"
           >
             {generating === 'pixel' ? '...' : 'Create'}
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-between p-4 rounded-lg" style={{backgroundColor: 'var(--sage-green)', border: '1px solid var(--warm-brown)'}}>
+          <div>
+            <h4 className="font-medium" style={{color: 'var(--luxury-white)'}}>Reddit Video Generator</h4>
+            <p className="text-sm" style={{color: 'var(--nude-200)'}}>Create YouTube videos from Reddit stories</p>
+          </div>
+          <Button
+            size="sm"
+            onClick={openRedditVideoGenerator}
+            className="luxury-button-primary"
+          >
+            Open Tool
           </Button>
         </div>
       </div>
