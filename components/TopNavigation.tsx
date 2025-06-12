@@ -16,12 +16,14 @@ import {
   TrendingUp,
   Bell,
   Search,
-  Activity
+  Activity,
+  MessageSquare
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Overview', href: '/', icon: LayoutDashboard },
   { name: 'Content', href: '/content', icon: Video },
+  { name: 'Reddit Auto', href: '/reddit-automation', icon: MessageSquare },
   { name: 'Campaigns', href: '/campaigns', icon: Target },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
