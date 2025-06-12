@@ -478,6 +478,7 @@ export class ShotstackService {
       similarity_boost: number;
     };
     duration: number;
+    startTime: number;
     addCaptions: boolean;
   }): Promise<{
     videoUrl: string;
@@ -513,8 +514,9 @@ export class ShotstackService {
       console.log('🎥 Creating video composition...');
       const renderJob = await this.createVideoRender({
         audioUrl: voiceoverUrl.url,
-        backgroundVideoUrl: backgroundVideoUrl,
+        backgroundVideoUrl: config.backgroundVideoUrl,
         duration: config.duration,
+        startTime: config.startTime,
         addCaptions: config.addCaptions,
         captionText: config.enhancedText
       });
@@ -579,6 +581,7 @@ export class ShotstackService {
     audioUrl: string;
     backgroundVideoUrl: string;
     duration: number;
+    startTime: number;
     addCaptions: boolean;
     captionText: string;
   }): Promise<{ id: string }> {
@@ -596,12 +599,14 @@ export class ShotstackService {
             length: params.duration
           }]
         },
-        // Background video track
+        // Background video track with trimming
         {
           clips: [{
             asset: {
               type: 'video',
-              src: params.backgroundVideoUrl
+              src: params.backgroundVideoUrl,
+              trim: params.startTime, // Start at specified time in source video
+              volume: 1
             },
             start: 0,
             length: params.duration,

@@ -12,7 +12,8 @@ const VideoGenerator = () => {
     youtubeUrl: '',
     category: 'drama',
     duration: 300, // 5 minutes default
-    voiceId: 'Adam'
+    voiceId: 'Adam',
+    startTime: 0 // Start time in seconds for YouTube video trimming
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -89,6 +90,7 @@ const VideoGenerator = () => {
           similarity_boost: 0.85
         },
         duration: settings.duration,
+        startTime: settings.startTime, // Pass trim start time
         addCaptions: true
       });
 
@@ -191,6 +193,29 @@ const VideoGenerator = () => {
                   <option key={voice.id} value={voice.id}>{voice.name}</option>
                 ))}
               </select>
+            </div>
+
+            {/* Start Time */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Start Time (minutes into video)
+              </label>
+              <select
+                value={settings.startTime}
+                onChange={(e) => setSettings(prev => ({ ...prev, startTime: parseInt(e.target.value) }))}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                disabled={isGenerating}
+              >
+                <option value={0}>Start from beginning</option>
+                <option value={60}>1 minute in</option>
+                <option value={120}>2 minutes in</option>
+                <option value={300}>5 minutes in</option>
+                <option value={600}>10 minutes in</option>
+                <option value={900}>15 minutes in</option>
+                <option value={1200}>20 minutes in</option>
+                <option value={1800}>30 minutes in</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-500">Skip intro/ads by starting later in the video</p>
             </div>
 
             {/* Duration */}
