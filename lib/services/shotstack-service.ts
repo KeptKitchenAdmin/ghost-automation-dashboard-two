@@ -16,11 +16,11 @@ export class ShotstackService {
   private productionUrl = 'https://api.shotstack.io/v1'
 
   constructor(apiKey?: string, isProduction = false) {
-    // Use your existing environment variable names
+    // ONLY use NEXT_PUBLIC_ versions - single source, no fallbacks
     if (isProduction) {
-      this.apiKey = apiKey || process.env.SHOTSTACK_PRODUCTION_API_KEY || ''
+      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || ''
     } else {
-      this.apiKey = apiKey || process.env.SHOTSTACK_SANDBOX_API_KEY || ''
+      this.apiKey = apiKey || process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || ''
     }
     this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
   }

@@ -18,10 +18,10 @@ export class ClaudeService {
   private static totalTokensToday = 0;
 
   constructor() {
-    // Use your existing environment variable name
-    if (process.env.ANTHROPIC_API_KEY) {
+    // ONLY use NEXT_PUBLIC_ version - single source, no fallbacks
+    if (process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY) {
       this.anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
+        apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
       });
     }
     this.resetDailyLimitsIfNeeded();
@@ -83,7 +83,7 @@ export class ClaudeService {
 
   async enhanceStory(story: RedditStory, targetDurationMinutes: number = 5): Promise<string> {
     // Check if Claude is available
-    if (!this.anthropic || !process.env.ANTHROPIC_API_KEY) {
+    if (!this.anthropic || !process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY) {
       console.log('⚠️ Claude API not configured, using fallback enhancement');
       return this.fallbackEnhancement(story);
     }
