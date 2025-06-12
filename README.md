@@ -55,3 +55,4 @@ All API routes are now pure TypeScript:
 - Mock data available when API keys not present
 - Full type safety throughout the application
 # Force Cloudflare rebuild Mon Jun  9 19:44:33 PDT 2025
+# Force deployment
