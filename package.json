@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npm run build:cleanup",
+    "build": "node scripts/check-env.js && next build && npm run build:cleanup",
     "build:cleanup": "find .next -name '*.pack' -delete 2>/dev/null || true; rm -rf .next/cache 2>/dev/null || true",
     "build:production": "rm -rf .next && npm run build",
     "start": "next start",

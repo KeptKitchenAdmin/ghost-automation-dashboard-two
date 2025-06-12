@@ -14,7 +14,16 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Clean static export configuration
+  // FORCE environment variables to be available in static build
+  env: {
+    NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY,
+    NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY,
+    NEXT_PUBLIC_ANTHROPIC_API_KEY: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
+  },
+  // Additional static export configuration
+  experimental: {
+    esmExternals: false,
+  },
 }
 
 module.exports = nextConfig

@@ -25,14 +25,22 @@ export class ShotstackService {
       this.baseUrl = this.stagingUrl;
     }
     
-    // Debug logging
-    console.log('🔍 Shotstack constructor:', {
+    // Build-time verification: Check if environment variables are available
+    console.log('🔍 Environment Variable Check:', {
       isProduction,
-      hasApiKey: !!this.apiKey,
-      keyLength: this.apiKey?.length || 0,
-      sandboxEnvExists: !!process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY,
-      productionEnvExists: !!process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY
+      sandboxKey: process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? `***${process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY.slice(-4)}` : 'MISSING',
+      productionKey: process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? `***${process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY.slice(-4)}` : 'MISSING',
+      anthropicKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY ? `***${process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY.slice(-4)}` : 'MISSING',
+      finalApiKey: this.apiKey ? `***${this.apiKey.slice(-4)}` : 'EMPTY',
+      allNextPublicVars: Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_'))
     });
+    
+    // Throw descriptive error if API key is missing
+    if (!this.apiKey || this.apiKey.trim() === '') {
+      const mode = isProduction ? 'PRODUCTION' : 'SANDBOX';
+      const envVar = isProduction ? 'NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY' : 'NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY';
+      throw new Error(`❌ ${mode} API key not configured. Check Cloudflare Pages environment variable: ${envVar}`);
+    }
   }
 
   /**
