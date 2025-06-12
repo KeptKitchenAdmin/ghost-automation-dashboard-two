@@ -126,7 +126,7 @@ export default function APIUsagePage() {
               onClick={refreshUsageData}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
             >
-              Load Usage Data from R2 Storage
+              Load Usage Data
             </button>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function APIUsagePage() {
           <div>
             <h1 className="luxury-heading-xl mb-2">API Usage Dashboard</h1>
             <p className="luxury-body-muted">
-              Usage data from content generation activities (stored in R2)
+              Real-time usage tracking from your content generation
             </p>
             {lastRefresh && (
               <p className="luxury-body-small text-warm-gray-400 mt-1">
@@ -156,7 +156,7 @@ export default function APIUsagePage() {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 mb-3"
             >
-              {loading ? 'Loading from R2...' : 'Refresh from R2 Storage'}
+              {loading ? 'Loading...' : 'Refresh Data'}
             </button>
             <div className="luxury-body-small text-warm-gray-500 mb-1">Total Daily Cost</div>
             <div className="luxury-heading-lg">
@@ -186,9 +186,6 @@ export default function APIUsagePage() {
                     {service === 'googleCloud' ? 'Google Cloud' : service}
                   </h3>
                 </div>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-600">
-                  R2 LOGGED
-                </span>
               </div>
 
               {/* Daily Usage */}
@@ -221,13 +218,36 @@ export default function APIUsagePage() {
                 </div>
               </div>
 
-              {/* Data Source */}
-              <div className="pt-4 border-t border-warm-gray-200">
-                <div className="luxury-body-small text-warm-gray-600 mb-1">Data Source</div>
-                <div className="luxury-body font-medium text-blue-600">
-                  R2 Storage Only
-                </div>
+              {/* Available Credits */}
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="luxury-body-small text-warm-gray-600 mb-2">Available Credits</div>
+                {service === 'openai' && (
+                  <div className="luxury-body-small font-medium text-green-600">
+                    ${monthlyData.cost.toFixed(2)} / $20.00 used
+                  </div>
+                )}
+                {service === 'elevenlabs' && (
+                  <div className="luxury-body-small font-medium text-green-600">
+                    {(monthlyData as any).characters || 0} / 10,000 credits used
+                  </div>
+                )}
+                {service === 'heygen' && (
+                  <div className="luxury-body-small font-medium text-green-600">
+                    {monthlyData.requests * 0.5} / 10 credits used
+                  </div>
+                )}
+                {service === 'googleCloud' && (
+                  <div className="luxury-body-small font-medium text-green-600">
+                    ${monthlyData.cost.toFixed(2)} / $300.00 used
+                  </div>
+                )}
+                {service === 'anthropic' && (
+                  <div className="luxury-body-small font-medium text-green-600">
+                    ${monthlyData.cost.toFixed(2)} / $15.00 used
+                  </div>
+                )}
               </div>
+
             </div>
           );
         })}
@@ -246,7 +266,7 @@ export default function APIUsagePage() {
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Data stored in Cloudflare R2 storage</span>
+                <span>Secure data storage with instant access</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
@@ -267,7 +287,7 @@ export default function APIUsagePage() {
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Usage data stays in your R2 storage</span>
+                <span>Your usage data stays private and secure</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
