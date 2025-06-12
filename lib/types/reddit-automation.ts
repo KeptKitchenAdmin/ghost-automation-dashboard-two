@@ -83,3 +83,57 @@ export interface RedditApiResponse {
     }>;
   };
 }
+
+// Additional types for Phase 1 foundation
+export interface ShotstackConfig {
+  apiKey: string;
+  environment: 'stage' | 'production';
+  webhookUrl?: string;
+}
+
+export interface ElevenLabsConfig {
+  voiceId: string;
+  modelId: string;
+  stability: number;
+  similarityBoost: number;
+  style: number;
+  useSpeakerBoost: boolean;
+}
+
+export interface VideoScript {
+  hook: string;
+  introduction: string;
+  mainContent: string[];
+  conclusion: string;
+  callToAction: string;
+  estimatedDuration: number;
+}
+
+export interface R2StorageFile {
+  key: string;
+  url: string;
+  bucket: string;
+  size: number;
+  contentType: string;
+  uploadedAt: string;
+}
+
+export interface UsageTracking {
+  date: string;
+  service: 'claude' | 'shotstack' | 'elevenlabs' | 'reddit';
+  operation: string;
+  apiCalls: number;
+  costUSD: number;
+  requestId: string;
+  status: 'success' | 'failed';
+}
+
+export interface APIResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  errorCode?: string;
+  requestId: string;
+  timestamp: string;
+  usageStats?: UsageTracking;
+}

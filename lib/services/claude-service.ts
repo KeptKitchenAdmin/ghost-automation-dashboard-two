@@ -18,9 +18,12 @@ export class ClaudeService {
   private static totalTokensToday = 0;
 
   constructor() {
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY!,
-    });
+    // Only initialize if API key is available
+    if (process.env.ANTHROPIC_API_KEY) {
+      this.anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+    }
     this.resetDailyLimitsIfNeeded();
   }
 
@@ -79,6 +82,12 @@ export class ClaudeService {
   }
 
   async enhanceStory(story: RedditStory, targetDurationMinutes: number = 5): Promise<string> {
+    // Check if Claude is available
+    if (!this.anthropic || !process.env.ANTHROPIC_API_KEY) {
+      console.log('⚠️ Claude API not configured, using fallback enhancement');
+      return this.fallbackEnhancement(story);
+    }
+
     const estimatedTokens = Math.ceil(story.content.length / 4);
     const estimatedCost = (estimatedTokens / 1000000) * 3; // $3 per 1M tokens
 

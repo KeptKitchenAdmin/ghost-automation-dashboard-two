@@ -8,48 +8,78 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#fdf2f4',
-          100: '#fce7ea',
-          200: '#f9d0d6',
-          300: '#f5a8b5',
-          400: '#a67c8a',
-          500: '#8B4B5C',
-          600: '#7A4A57',
-          700: '#6a3f4b',
-          800: '#5a353f',
-          900: '#4a2b33',
+        // Professional dark theme palette
+        gray: {
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#9ca3af',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          750: '#2d3748', // Custom mid-tone
+          800: '#1f2937',
+          850: '#1a202c', // Custom darker
+          900: '#111827',
+          950: '#030712', // Deepest black
         },
-        secondary: {
-          50: '#f8f7ff',
-          100: '#f1efff',
-          200: '#e6e3ff',
-          300: '#d1cbff',
-          400: '#b5a8ff',
-          500: '#9580ff',
-          600: '#8366f7',
-          700: '#7354e3',
-          800: '#5d46bf',
-          900: '#4c3d9c',
+        blue: {
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
         },
-        dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#252a3a',
-          900: '#1a1f2e',
+        green: {
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+        },
+        red: {
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+        },
+        yellow: {
+          400: '#facc15',
+          500: '#eab308',
+          600: '#ca8a04',
+        },
+        purple: {
+          400: '#a78bfa',
+          500: '#8b5cf6',
+          600: '#7c3aed',
+        },
+        orange: {
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
         }
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'professional-gradient': 'linear-gradient(135deg, #1a1f2e 0%, #252a3a 50%, #334155 100%)',
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'dark': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+        'dark-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+      }
     },
   },
   plugins: [],

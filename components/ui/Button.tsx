@@ -1,34 +1,60 @@
-'use client'
+import React from 'react';
 
-import { ButtonHTMLAttributes, forwardRef } from 'react'
-import { clsx } from 'clsx'
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: React.ComponentType<{ size: number }>;
+  iconPosition?: 'left' | 'right';
+  loading?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  className?: string;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
-    return (
-      <button
-        className={clsx(
-          'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none',
-          {
-            'bg-primary-600 text-white hover:bg-primary-700': variant === 'primary',
-            'bg-gray-700 text-gray-300 hover:bg-gray-600': variant === 'secondary',
-            'hover:bg-gray-800 text-gray-300': variant === 'ghost',
-            'h-8 px-3 text-sm': size === 'sm',
-            'h-10 px-4': size === 'md',
-            'h-12 px-6 text-lg': size === 'lg',
-          },
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  icon: Icon,
+  iconPosition = 'left',
+  loading = false,
+  disabled = false,
+  onClick,
+  type = 'button',
+  className = '',
+}) => {
+  const baseClasses = 'font-medium rounded-lg transition-colors duration-200 flex items-center gap-2 disabled:cursor-not-allowed';
+  
+  const variantClasses = {
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    success: 'btn-success',
+    danger: 'btn-danger',
+    ghost: 'btn-ghost',
+  };
+  
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
+  };
 
-Button.displayName = 'Button'
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    >
+      {loading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+      ) : (
+        Icon && iconPosition === 'left' && <Icon size={16} />
+      )}
+      {children}
+      {!loading && Icon && iconPosition === 'right' && <Icon size={16} />}
+    </button>
+  );
+};

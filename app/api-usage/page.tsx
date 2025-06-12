@@ -1,6 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+import { Card } from '@/components/ui/Card'
+import { ProgressBar } from '@/components/ui/ProgressBar'
+import { StatusBadge } from '@/components/ui/StatusBadge'
 
 interface UsageStats {
   daily: {
@@ -115,16 +118,16 @@ export default function APIUsagePage() {
 
   if (!usageStats && !loading) {
     return (
-      <div className="luxury-container luxury-padding">
-        <div className="luxury-card">
+      <div className="container-app py-8">
+        <div className="card p-6">
           <div className="text-center">
-            <h2 className="luxury-heading-lg mb-4">API Usage Dashboard</h2>
-            <p className="luxury-body text-warm-gray-600 mb-6">
+            <h2 className="text-xl font-medium text-white mb-4">API Usage Dashboard</h2>
+            <p className="text-gray-400 mb-6">
               Track usage from your content generation activities
             </p>
             <button 
               onClick={refreshUsageData}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="btn-primary"
             >
               Load Usage Data
             </button>
@@ -135,17 +138,17 @@ export default function APIUsagePage() {
   }
 
   return (
-    <div className="luxury-container luxury-padding">
+    <div className="container-app py-8">
       {/* Header */}
-      <div className="luxury-card mb-8">
+      <div className="card p-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="luxury-heading-xl mb-2">API Usage Dashboard</h1>
-            <p className="luxury-body-muted">
+            <h1 className="text-3xl font-semibold text-white mb-2">API Usage Dashboard</h1>
+            <p className="text-gray-400">
               Real-time usage tracking from your content generation
             </p>
             {lastRefresh && (
-              <p className="luxury-body-small text-warm-gray-400 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Last updated: {lastRefresh}
               </p>
             )}
@@ -154,15 +157,15 @@ export default function APIUsagePage() {
             <button 
               onClick={refreshUsageData}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 mb-3"
+              className="btn-primary mb-3"
             >
               {loading ? 'Loading...' : 'Refresh Data'}
             </button>
-            <div className="luxury-body-small text-warm-gray-500 mb-1">Total Daily Cost</div>
-            <div className="luxury-heading-lg">
+            <div className="text-sm text-gray-500 mb-1">Total Daily Cost</div>
+            <div className="text-xl font-medium text-white mb-4">
               ${usageStats?.summary.dailyTotal.toFixed(2) || '0.00'}
             </div>
-            <div className="luxury-body-small text-warm-gray-500 mt-1">
+            <div className="text-sm text-gray-500 mt-1">
               Monthly: ${usageStats?.summary.monthlyTotal.toFixed(2) || '0.00'}
             </div>
           </div>
@@ -176,13 +179,13 @@ export default function APIUsagePage() {
           const monthlyData = usageStats?.monthly[service as keyof typeof usageStats.monthly] || { tokens: 0, characters: 0, requests: 0, cost: 0 };
           
           return (
-            <div key={service} className="luxury-card">
+            <div key={service} className="card p-6">
               {/* Service Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full mr-3" 
                        style={{backgroundColor: getServiceColor(service)}}></div>
-                  <h3 className="luxury-heading-md capitalize">
+                  <h3 className="text-lg font-medium text-white capitalize">
                     {service === 'googleCloud' ? 'Google Cloud' : service}
                   </h3>
                 </div>
@@ -191,12 +194,12 @@ export default function APIUsagePage() {
               {/* Daily Usage */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="luxury-body-small text-warm-gray-600">Today</span>
-                  <span className="luxury-body-small font-medium">
+                  <span className="text-sm text-gray-400">Today</span>
+                  <span className="text-sm font-medium text-white">
                     ${dailyData.cost.toFixed(3)}
                   </span>
                 </div>
-                <div className="luxury-body-small text-warm-gray-500">
+                <div className="text-sm text-gray-500">
                   {dailyData.requests} requests
                   {dailyData.tokens ? ` • ${dailyData.tokens.toLocaleString()} tokens` : ''}
                   {(dailyData as any).characters ? ` • ${(dailyData as any).characters.toLocaleString()} chars` : ''}
@@ -206,12 +209,12 @@ export default function APIUsagePage() {
               {/* Monthly Usage */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="luxury-body-small text-warm-gray-600">This Month</span>
-                  <span className="luxury-body-small font-medium">
+                  <span className="text-sm text-gray-400">This Month</span>
+                  <span className="text-sm font-medium text-white">
                     ${monthlyData.cost.toFixed(2)}
                   </span>
                 </div>
-                <div className="luxury-body-small text-warm-gray-500">
+                <div className="text-sm text-gray-500">
                   {monthlyData.requests} requests
                   {monthlyData.tokens ? ` • ${monthlyData.tokens.toLocaleString()} tokens` : ''}
                   {(monthlyData as any).characters ? ` • ${(monthlyData as any).characters.toLocaleString()} chars` : ''}
@@ -219,30 +222,30 @@ export default function APIUsagePage() {
               </div>
 
               {/* Available Credits */}
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                <div className="luxury-body-small text-warm-gray-600 mb-2">Available Credits</div>
+              <div className="mb-4 p-3 bg-gray-750 rounded-lg border border-gray-600">
+                <div className="text-sm text-gray-400 mb-2">Available Credits</div>
                 {service === 'openai' && (
-                  <div className="luxury-body-small font-medium text-green-600">
+                  <div className="text-sm font-medium text-green-400">
                     ${monthlyData.cost.toFixed(2)} / $20.00 used
                   </div>
                 )}
                 {service === 'elevenlabs' && (
-                  <div className="luxury-body-small font-medium text-green-600">
+                  <div className="text-sm font-medium text-green-400">
                     {(monthlyData as any).characters || 0} / 10,000 credits used
                   </div>
                 )}
                 {service === 'heygen' && (
-                  <div className="luxury-body-small font-medium text-green-600">
+                  <div className="text-sm font-medium text-green-400">
                     {monthlyData.requests * 0.5} / 10 credits used
                   </div>
                 )}
                 {service === 'googleCloud' && (
-                  <div className="luxury-body-small font-medium text-green-600">
+                  <div className="text-sm font-medium text-green-400">
                     ${monthlyData.cost.toFixed(2)} / $300.00 used
                   </div>
                 )}
                 {service === 'anthropic' && (
-                  <div className="luxury-body-small font-medium text-green-600">
+                  <div className="text-sm font-medium text-green-400">
                     ${monthlyData.cost.toFixed(2)} / $15.00 used
                   </div>
                 )}
@@ -254,48 +257,48 @@ export default function APIUsagePage() {
       </div>
 
       {/* System Information */}
-      <div className="luxury-card mt-8">
-        <h2 className="luxury-heading-lg mb-4">System Information</h2>
+      <div className="card p-6 mt-8">
+        <h2 className="text-xl font-medium text-white mb-4">System Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="luxury-heading-md mb-3 text-blue-600">Data Source</h3>
-            <ul className="space-y-2 luxury-body-small">
+            <h3 className="text-lg font-medium text-blue-400 mb-3">Data Source</h3>
+            <ul className="space-y-2 text-sm">
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Usage logged during content generation only</span>
+                <span className="text-gray-300">Usage logged during content generation only</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Secure data storage with instant access</span>
+                <span className="text-gray-300">Secure data storage with instant access</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Manual refresh to view current statistics</span>
+                <span className="text-gray-300">Manual refresh to view current statistics</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Zero external API monitoring calls</span>
+                <span className="text-gray-300">Zero external API monitoring calls</span>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="luxury-heading-md mb-3 text-green-600">Privacy & Control</h3>
-            <ul className="space-y-2 luxury-body-small">
+            <h3 className="text-lg font-medium text-green-400 mb-3">Privacy & Control</h3>
+            <ul className="space-y-2 text-sm">
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
-                <span>API keys never used for monitoring</span>
+                <span className="text-gray-300">API keys never used for monitoring</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Your usage data stays private and secure</span>
+                <span className="text-gray-300">Your usage data stays private and secure</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
-                <span>No background processes or polling</span>
+                <span className="text-gray-300">No background processes or polling</span>
               </li>
               <li className="flex items-start">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 mt-1.5"></div>
-                <span>Complete control over data refresh</span>
+                <span className="text-gray-300">Complete control over data refresh</span>
               </li>
             </ul>
           </div>
@@ -303,41 +306,41 @@ export default function APIUsagePage() {
       </div>
 
       {/* Free Plan Limits */}
-      <div className="luxury-card mt-8 bg-green-50 border-green-200">
-        <h2 className="luxury-heading-lg mb-4 text-green-800">Free Plan Capacity</h2>
+      <div className="card p-6 mt-8 bg-green-900 border-green-700">
+        <h2 className="text-xl font-medium text-green-300 mb-4">Free Plan Capacity</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="luxury-heading-md text-green-600">~20 clips/month</div>
-            <div className="luxury-body-small text-green-700">Total Capacity</div>
-            <div className="luxury-body-small text-green-600 mt-1">Limited by HeyGen (10 credits)</div>
+            <div className="text-lg font-medium text-green-400">~20 clips/month</div>
+            <div className="text-sm text-green-500">Total Capacity</div>
+            <div className="text-sm text-green-400 mt-1">Limited by HeyGen (10 credits)</div>
           </div>
           <div className="text-center">
-            <div className="luxury-heading-md text-blue-600">$20/month</div>
-            <div className="luxury-body-small text-blue-700">OpenAI Budget</div>
-            <div className="luxury-body-small text-blue-600 mt-1">4,000-20,000 clip capacity</div>
+            <div className="text-lg font-medium text-blue-400">$20/month</div>
+            <div className="text-sm text-blue-500">OpenAI Budget</div>
+            <div className="text-sm text-blue-400 mt-1">4,000-20,000 clip capacity</div>
           </div>
           <div className="text-center">
-            <div className="luxury-heading-md text-amber-600">10K credits</div>
-            <div className="luxury-body-small text-amber-700">ElevenLabs</div>
-            <div className="luxury-body-small text-amber-600 mt-1">65-130 clip capacity</div>
+            <div className="text-lg font-medium text-yellow-400">10K credits</div>
+            <div className="text-sm text-yellow-500">ElevenLabs</div>
+            <div className="text-sm text-yellow-400 mt-1">65-130 clip capacity</div>
           </div>
           <div className="text-center">
-            <div className="luxury-heading-md text-purple-600">$300 credit</div>
-            <div className="luxury-body-small text-purple-700">Google Cloud</div>
-            <div className="luxury-body-small text-purple-600 mt-1">25,000+ clip capacity</div>
+            <div className="text-lg font-medium text-purple-400">$300 credit</div>
+            <div className="text-sm text-purple-500">Google Cloud</div>
+            <div className="text-sm text-purple-400 mt-1">25,000+ clip capacity</div>
           </div>
         </div>
       </div>
 
       {/* Implementation Note */}
-      <div className="luxury-card mt-8 bg-blue-50 border-blue-200">
+      <div className="card p-6 mt-8 bg-blue-900 border-blue-700">
         <div className="flex items-start">
           <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3 mt-1">
             <span className="text-white text-xs">ℹ</span>
           </div>
           <div>
-            <h3 className="luxury-heading-md text-blue-800 mb-2">Content Generation Only</h3>
-            <p className="luxury-body-small text-blue-700">
+            <h3 className="text-lg font-medium text-blue-300 mb-2">Content Generation Only</h3>
+            <p className="text-sm text-blue-400">
               This dashboard shows usage data logged during your content generation workflow: 
               OpenAI → HeyGen → ElevenLabs → Google Cloud. No external APIs are called for monitoring purposes.
               All data comes from R2 storage logs created during actual content generation.

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { RealContentGenerator } from '@/components/RealContentGenerator'
+import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
 
 export default function ContentHub() {
   const [followerCount, setFollowerCount] = useState(0)
@@ -12,20 +14,22 @@ export default function ContentHub() {
   }, [])
 
   return (
-    <div className="luxury-container luxury-padding">
+    <div className="container-app py-8">
       {/* Clean Header */}
-      <div className="luxury-card mb-8">
+      <Card className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="luxury-heading-xl mb-2">Content Generation Hub</h1>
-            <p className="luxury-body-muted">
+            <h1 className="text-3xl font-semibold text-white mb-2">Content Generation Hub</h1>
+            <p className="text-gray-400">
               Generate viral content optimized for TikTok growth
             </p>
           </div>
           <div className="text-right">
-            <div className="luxury-body-small text-warm-gray-500 mb-1">Followers</div>
-            <div className="luxury-heading-lg text-blue-600">{followerCount.toLocaleString()}</div>
-            <button 
+            <div className="text-sm text-gray-500 mb-1">Followers</div>
+            <div className="text-xl font-medium text-blue-400">{followerCount.toLocaleString()}</div>
+            <Button 
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 const newCount = prompt('Update follower count:', followerCount.toString())
                 if (newCount && !isNaN(parseInt(newCount))) {
@@ -34,18 +38,18 @@ export default function ContentHub() {
                   localStorage.setItem('followerCount', count.toString())
                 }
               }}
-              className="luxury-button-secondary text-xs mt-1"
+              className="mt-1"
             >
               Update
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Main Content Generator */}
-      <div className="luxury-card">
+      <Card>
         <RealContentGenerator />
-      </div>
+      </Card>
     </div>
   )
 }

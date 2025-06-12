@@ -557,42 +557,34 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
   }
 
   return (
-    <div style={{backgroundColor: 'var(--luxury-white)', border: '1px solid var(--nude-300)', padding: 'var(--space-lg)', borderRadius: '2px'}}>
+    <div className="bg-gray-800 border border-gray-700 p-6 rounded-lg">
       <div className="text-center mb-8">
-        <h3 style={{color: 'var(--luxury-black)', fontSize: '28px', fontWeight: '400', marginBottom: '16px'}}>
+        <h3 className="text-2xl font-normal text-white mb-4">
           Content Generator
         </h3>
-        <p style={{color: 'var(--warm-gray-700)', fontSize: '16px'}}>
+        <p className="text-gray-400">
           Generate viral content for TikTok growth
         </p>
       </div>
       
       {/* Clean Configuration */}
       <div className="space-y-6 mb-8">
-        <div style={{backgroundColor: 'var(--luxury-cream)', border: '1px solid var(--warm-brown)', padding: '24px', borderRadius: '2px'}}>
-          <h4 style={{color: 'var(--luxury-black)', fontSize: '16px', fontWeight: '500', marginBottom: '8px'}}>Growth Mode Active</h4>
-          <p style={{color: 'var(--warm-gray-800)', fontSize: '14px', lineHeight: '1.5'}}>
+        <div className="bg-gray-750 border border-gray-600 p-6 rounded-lg">
+          <h4 className="text-white text-base font-medium mb-2">Growth Mode Active</h4>
+          <p className="text-gray-300 text-sm leading-relaxed">
             Generating educational content for 0-1K follower growth phase.
             No monetization until follower milestone reached.
           </p>
         </div>
 
         <div>
-          <label style={{color: 'var(--luxury-black)', fontSize: '14px', fontWeight: '500', marginBottom: '8px', display: 'block'}}>
+          <label className="block text-sm font-medium text-white mb-2">
             Content Type
           </label>
           <select 
             value={contentType}
             onChange={(e) => setContentType(e.target.value as ContentType)}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              border: '1px solid var(--nude-300)',
-              borderRadius: '2px',
-              backgroundColor: 'var(--luxury-white)',
-              color: 'var(--luxury-black)',
-              fontSize: '16px'
-            }}
+            className="select w-full"
           >
             <option value="viral-growth-conspiracy">Viral Growth (0-1K Followers)</option>
             <option value="viral-affiliate">Viral Product Review</option>
@@ -610,21 +602,21 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
           </select>
         </div>
 
-        <div style={{backgroundColor: 'var(--luxury-cream)', border: '1px solid var(--warm-brown)', padding: '16px', borderRadius: '2px'}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
-            <div style={{width: '8px', height: '8px', backgroundColor: 'var(--warm-brown)', borderRadius: '50%'}}></div>
-            <p style={{color: 'var(--luxury-black)', fontSize: '14px', fontWeight: '500', margin: 0}}>
+        <div className="bg-gray-750 border border-gray-600 p-4 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <p className="text-white text-sm font-medium">
               Intelligent Content Optimization
             </p>
           </div>
-          <p style={{color: 'var(--warm-brown)', fontSize: '12px', margin: 0}}>
+          <p className="text-blue-400 text-xs">
             ✅ Content variation • Audience optimization • Compliance checking • Performance enhancement
           </p>
         </div>
 
         {businessModel === 'affiliate' && contentType !== 'viral-growth-conspiracy' && (
           <div>
-            <label className="block text-sm font-medium luxury-body-muted mb-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Target Product/Niche
             </label>
             <input
@@ -632,17 +624,17 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
               value={targetProduct}
               onChange={(e) => setTargetProduct(e.target.value)}
               placeholder="e.g., productivity software, fitness equipment"
-              className="luxury-input"
+              className="input"
             />
           </div>
         )}
 
         {contentType === 'viral-growth-conspiracy' && (
-          <div className="p-4 rounded-lg" style={{backgroundColor: 'var(--nude-200)', border: '1px solid var(--warm-brown)'}}>
-            <p className="text-sm" style={{color: 'var(--warm-brown)'}}>
+          <div className="p-4 rounded-lg bg-gray-750 border border-blue-600">
+            <p className="text-sm text-blue-400">
               <strong>GROWTH MODE ACTIVE</strong>
             </p>
-            <p className="text-xs luxury-body-muted mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               NO monetization until 1K followers. Pure viral educational content for explosive growth.
             </p>
           </div>
@@ -650,7 +642,7 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
 
         {businessModel === 'service' && (
           <div>
-            <label className="block text-sm font-medium luxury-body-muted mb-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Service Type
             </label>
             <input
@@ -658,7 +650,7 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
               placeholder="e.g., AI automation, business systems"
-              className="luxury-input"
+              className="input"
             />
           </div>
         )}
@@ -780,7 +772,7 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
 
         {contentType !== 'viral-clip-generator' && (
         <div>
-          <label style={{color: 'var(--luxury-black)', fontSize: '14px', fontWeight: '500', marginBottom: '8px', display: 'block'}}>
+          <label className="block text-sm font-medium text-white mb-2">
             Call to Action
           </label>
           <input
@@ -788,15 +780,7 @@ ${request.callToAction || "Comment 'SYSTEM' if you want something like this buil
             value={callToAction}
             onChange={(e) => setCallToAction(e.target.value)}
             placeholder="e.g., Comment 'SYSTEM' below, Link in bio"
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              border: '1px solid var(--nude-300)',
-              borderRadius: '2px',
-              backgroundColor: 'var(--luxury-white)',
-              color: 'var(--luxury-black)',
-              fontSize: '16px'
-            }}
+            className="input"
           />
         </div>
         )}

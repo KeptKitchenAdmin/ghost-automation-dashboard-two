@@ -8,11 +8,16 @@ import {
   Target,
   Eye,
   Calendar,
-  CheckCircle
+  CheckCircle,
+  DollarSign
 } from 'lucide-react'
 import RevenueChart from '@/components/RevenueChart'
 import ContentPerformanceChart from '@/components/ContentPerformanceChart'
 import { QuickActions } from '@/components/QuickActions'
+import { Card } from '@/components/ui/Card'
+import { ProgressBar } from '@/components/ui/ProgressBar'
+import { StatusBadge } from '@/components/ui/StatusBadge'
+import { Button } from '@/components/ui/Button'
 
 export default function Dashboard() {
   // REAL TikTok Metrics - No Fake Data
@@ -38,194 +43,189 @@ export default function Dashboard() {
   const daysToMonetization = tiktokMetrics.dailyGrowth > 0 ? Math.ceil(followersRemaining / tiktokMetrics.dailyGrowth) : '∞'
 
   return (
-    <div style={{backgroundColor: 'var(--luxury-white)', minHeight: '100vh'}}>
-      <div className="luxury-container">
+    <div className="min-h-screen bg-gray-900">
+      <div className="container-app py-8">
         
-        {/* Header Section - Massive Whitespace */}
-        <div className="text-center luxury-section">
-          <h1 className="luxury-heading-xl">
-            TikTok Growth Dashboard
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            AI Automation Dashboard
           </h1>
-          <p style={{color: 'var(--warm-gray-700)', fontSize: '18px'}} className="max-w-2xl mx-auto">
-            Track progress to 1,000 followers and monetization readiness
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Track content performance and growth metrics across platforms
           </p>
         </div>
 
-        {/* Key Metrics Grid - Clean Luxury Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 luxury-section">
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           
           {/* Followers Progress */}
-          <div className="luxury-card">
-            <div className="flex items-center justify-between mb-6">
+          <Card className="animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="luxury-body-muted text-sm">Current Followers</p>
-                <h3 className="luxury-metric-value">
+                <p className="text-gray-400 text-sm">Current Followers</p>
+                <h3 className="text-2xl font-bold text-white">
                   {tiktokMetrics.currentFollowers.toLocaleString()}
                 </h3>
               </div>
-              <Users size={24} style={{color: 'var(--warm-brown)'}} />
+              <Users className="text-blue-400" size={24} />
             </div>
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs luxury-body-muted">Goal: {tiktokMetrics.followerGoal}</span>
-                <span className="text-xs luxury-body-muted">{progressPercentage.toFixed(1)}%</span>
-              </div>
-              <div className="w-full h-2 rounded-full" style={{backgroundColor: 'var(--nude-200)'}}>
-                <div 
-                  className="h-2 rounded-full transition-all duration-500"
-                  style={{
-                    backgroundColor: 'var(--sage-green)',
-                    width: `${Math.min(progressPercentage, 100)}%`
-                  }}
-                ></div>
-              </div>
-            </div>
-            <p className="text-xs luxury-body-muted">
+            <ProgressBar
+              value={tiktokMetrics.currentFollowers}
+              max={tiktokMetrics.followerGoal}
+              color="blue"
+              showLabel
+              label={`Goal: ${tiktokMetrics.followerGoal}`}
+              className="mb-2"
+            />
+            <p className="text-xs text-gray-400">
               {followersRemaining} followers to monetization
             </p>
-          </div>
+          </Card>
 
           {/* Daily Growth */}
-          <div className="luxury-card">
-            <div className="flex items-center justify-between mb-6">
+          <Card className="animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="luxury-body-muted text-sm">Daily Growth</p>
-                <h3 className="luxury-metric-value">
+                <p className="text-gray-400 text-sm">Daily Growth</p>
+                <h3 className="text-2xl font-bold text-white">
                   +{tiktokMetrics.dailyGrowth}
                 </h3>
               </div>
-              <TrendingUp size={24} style={{color: 'var(--warm-brown)'}} />
+              <TrendingUp className="text-green-400" size={24} />
             </div>
-            <p className="text-xs luxury-body-muted">
+            <p className="text-xs text-gray-400">
               {daysToMonetization} days to 1K milestone
             </p>
-          </div>
+          </Card>
 
           {/* Average Views */}
-          <div className="luxury-card">
-            <div className="flex items-center justify-between mb-6">
+          <Card className="animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="luxury-body-muted text-sm">Avg Views</p>
-                <h3 className="luxury-metric-value">
+                <p className="text-gray-400 text-sm">Avg Views</p>
+                <h3 className="text-2xl font-bold text-white">
                   {tiktokMetrics.avgViews.toLocaleString()}
                 </h3>
               </div>
-              <Eye size={24} style={{color: 'var(--warm-brown)'}} />
+              <Eye className="text-purple-400" size={24} />
             </div>
-            <p className="text-xs luxury-body-muted">
+            <p className="text-xs text-gray-400">
               {tiktokMetrics.engagementRate}% engagement rate
             </p>
-          </div>
+          </Card>
 
           {/* HeyGen Credits */}
-          <div className="luxury-card">
-            <div className="flex items-center justify-between mb-6">
+          <Card className="animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="luxury-body-muted text-sm">HeyGen Credits</p>
-                <h3 className="luxury-metric-value">
+                <p className="text-gray-400 text-sm">HeyGen Credits</p>
+                <h3 className="text-2xl font-bold text-white">
                   {tiktokMetrics.heygenCredits}/{tiktokMetrics.totalCredits}
                 </h3>
               </div>
-              <Video size={24} style={{color: 'var(--warm-brown)'}} />
+              <Video className="text-orange-400" size={24} />
             </div>
-            <p className="text-xs luxury-body-muted">
+            <p className="text-xs text-gray-400">
               {tiktokMetrics.videosReady} videos ready to post
             </p>
-          </div>
+          </Card>
         </div>
 
-        {/* Charts Section - Clean Gallery Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 luxury-section">
-          <div className="luxury-card">
-            <h3 className="luxury-heading-lg mb-8">
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <h3 className="text-xl font-semibold text-white mb-6">
               Revenue Growth
             </h3>
             <RevenueChart />
-          </div>
+          </Card>
           
-          <div className="luxury-card">
-            <h3 className="luxury-heading-lg mb-8">
+          <Card>
+            <h3 className="text-xl font-semibold text-white mb-6">
               Content Performance
             </h3>
             <ContentPerformanceChart />
-          </div>
+          </Card>
         </div>
 
-        {/* Quick Actions - Minimal & Clean */}
-        <div className="luxury-section">
+        {/* Quick Actions */}
+        <div className="mb-8">
           <QuickActions />
         </div>
 
-        {/* Video Performance Tracker - Clean Table */}
-        <div className="luxury-card luxury-section">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="luxury-heading-lg">
+        {/* Video Performance Tracker */}
+        <Card className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">
               Recent Videos Performance
             </h3>
-            <button className="luxury-button-secondary">
+            <Button variant="secondary">
               View All
-            </button>
+            </Button>
           </div>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left" style={{borderBottom: '1px solid var(--nude-300)'}}>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Video</th>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Views</th>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Engagement</th>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Hook Retention</th>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Followers</th>
-                  <th className="pb-4 text-sm luxury-body-muted font-medium">Status</th>
+                <tr className="text-left border-b border-gray-700">
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Video</th>
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Views</th>
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Engagement</th>
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Hook Retention</th>
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Followers</th>
+                  <th className="pb-4 text-sm text-gray-400 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentVideos.length > 0 ? recentVideos.map((video) => (
-                  <tr key={video.id} style={{borderBottom: '1px solid var(--nude-200)'}}>
-                    <td className="py-6">
+                  <tr key={video.id} className="border-b border-gray-800">
+                    <td className="py-4">
                       <div>
-                        <p style={{color: 'var(--luxury-black)'}} className="font-medium">
+                        <p className="text-white font-medium">
                           {video.title}
                         </p>
-                        <p className="text-xs luxury-body-muted mt-1">
+                        <p className="text-xs text-gray-400 mt-1">
                           {video.postedHours}h ago
                         </p>
                       </div>
                     </td>
-                    <td className="py-6">
-                      <p style={{color: 'var(--luxury-black)'}} className="font-medium">
+                    <td className="py-4">
+                      <p className="text-white font-medium">
                         {video.views.toLocaleString()}
                       </p>
                     </td>
-                    <td className="py-6">
-                      <p style={{color: 'var(--luxury-black)'}} className="font-medium">
+                    <td className="py-4">
+                      <p className="text-white font-medium">
                         {video.engagementRate}%
                       </p>
                     </td>
-                    <td className="py-6">
-                      <p style={{color: 'var(--luxury-black)'}} className="font-medium">
+                    <td className="py-4">
+                      <p className="text-white font-medium">
                         {video.hookRetention}%
                       </p>
                     </td>
-                    <td className="py-6">
-                      <p style={{color: 'var(--luxury-black)'}} className="font-medium">
+                    <td className="py-4">
+                      <p className="text-white font-medium">
                         +{video.followersGained}
                       </p>
                     </td>
-                    <td className="py-6">
-                      <span className={`luxury-status-${
-                        video.status === 'viral' ? 'success' :
-                        video.status === 'performing' ? 'pending' :
-                        'muted'
-                      }`}>
+                    <td className="py-4">
+                      <StatusBadge 
+                        variant={
+                          video.status === 'viral' ? 'success' :
+                          video.status === 'performing' ? 'info' :
+                          'warning'
+                        }
+                      >
                         {video.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                   </tr>
                 )) : (
                   <tr>
                     <td colSpan={6} className="py-12 text-center">
-                      <p className="luxury-body-muted">
+                      <p className="text-gray-400">
                         No videos posted yet. Generate and post your first viral content!
                       </p>
                     </td>
@@ -234,57 +234,54 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
-        {/* Advanced Analytics - Clean Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 luxury-section">
-          <div className="luxury-card text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                 style={{backgroundColor: 'var(--nude-200)'}}>
-              <Target size={24} style={{color: 'var(--warm-brown)'}} />
+        {/* Advanced Analytics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+              <Target className="text-blue-400" size={24} />
             </div>
-            <h4 className="luxury-heading-lg mb-2">
+            <h4 className="text-lg font-semibold text-white mb-2">
               Hook Effectiveness
             </h4>
-            <p className="luxury-metric-value mb-2">
+            <p className="text-2xl font-bold text-white mb-2">
               {tiktokMetrics.hookEffectiveness}%
             </p>
-            <p className="luxury-body-muted text-sm">
+            <p className="text-sm text-gray-400">
               Average retention in first 3 seconds
             </p>
-          </div>
+          </Card>
 
-          <div className="luxury-card text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                 style={{backgroundColor: 'var(--nude-200)'}}>
-              <Calendar size={24} style={{color: 'var(--warm-brown)'}} />
+          <Card className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+              <Calendar className="text-green-400" size={24} />
             </div>
-            <h4 className="luxury-heading-lg mb-2">
+            <h4 className="text-lg font-semibold text-white mb-2">
               Posting Streak
             </h4>
-            <p className="luxury-metric-value mb-2">
+            <p className="text-2xl font-bold text-white mb-2">
               {tiktokMetrics.postingStreak}/7
             </p>
-            <p className="luxury-body-muted text-sm">
+            <p className="text-sm text-gray-400">
               Days this week
             </p>
-          </div>
+          </Card>
 
-          <div className="luxury-card text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center" 
-                 style={{backgroundColor: 'var(--nude-200)'}}>
-              <CheckCircle size={24} style={{color: 'var(--warm-brown)'}} />
+          <Card className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+              <CheckCircle className="text-purple-400" size={24} />
             </div>
-            <h4 className="luxury-heading-lg mb-2">
+            <h4 className="text-lg font-semibold text-white mb-2">
               Shadowban Risk
             </h4>
-            <p className="luxury-metric-value mb-2">
+            <p className="text-2xl font-bold text-white mb-2">
               {tiktokMetrics.shadowbanRisk}
             </p>
-            <p className="luxury-body-muted text-sm">
+            <p className="text-sm text-gray-400">
               Account health status
             </p>
-          </div>
+          </Card>
         </div>
 
       </div>

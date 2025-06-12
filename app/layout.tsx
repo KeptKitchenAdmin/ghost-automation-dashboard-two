@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import TopNavigation from '@/components/TopNavigation'
+import { Sidebar } from '@/components/layout/Sidebar'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Automation Empire',
-  description: 'Professional AI-Powered Content & Service Sales Platform',
+  title: 'GhostTrace - AI Automation',
+  description: 'Professional AI-Powered Content & Automation Platform',
 }
 
 export default function RootLayout({
@@ -18,12 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen">
-          <TopNavigation />
-          <main className="luxury-container">
-            <div className="luxury-section">
-              {children}
-            </div>
+        <div className="min-h-screen bg-gray-900 flex">
+          <Sidebar />
+          <main className="flex-1">
+            {children}
           </main>
         </div>
       </body>

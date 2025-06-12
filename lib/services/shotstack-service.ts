@@ -15,8 +15,8 @@ export class ShotstackService {
   private stagingUrl = 'https://api.shotstack.io/stage'
   private productionUrl = 'https://api.shotstack.io/v1'
 
-  constructor(apiKey: string, isProduction = false) {
-    this.apiKey = apiKey
+  constructor(apiKey?: string, isProduction = false) {
+    this.apiKey = apiKey || process.env.SHOTSTACK_API_KEY || ''
     this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
   }
 
@@ -464,6 +464,58 @@ export class ShotstackService {
     } catch (error) {
       console.error('Error logging Shotstack usage:', error)
     }
+  }
+
+  /**
+   * Generate video with Shotstack - wrapper method for Reddit automation page
+   */
+  async generateVideoWithShotstack(config: {
+    enhancedText: string;
+    backgroundVideoUrl: string;
+    voiceSettings: {
+      voice_id: string;
+      stability: number;
+      similarity_boost: number;
+    };
+    duration: number;
+    addCaptions: boolean;
+  }): Promise<{
+    videoUrl: string;
+    audioUrl?: string;
+    costs: {
+      shotstack_cost: number;
+      elevenlabs_cost: number;
+      total_cost: number;
+    };
+  }> {
+    if (!this.apiKey) {
+      throw new Error('Shotstack API key not configured');
+    }
+
+    // For now, simulate the video generation
+    // In a full implementation, this would:
+    // 1. Generate audio with ElevenLabs
+    // 2. Create video timeline
+    // 3. Submit to Shotstack
+    // 4. Poll for completion
+    // 5. Return final URLs
+
+    console.log('🎬 Shotstack: Simulating video generation workflow');
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const estimatedCost = this.calculateRenderCost(config.duration);
+    
+    return {
+      videoUrl: `https://shotstack-simulation.com/video_${Date.now()}.mp4`,
+      audioUrl: `https://shotstack-simulation.com/audio_${Date.now()}.mp3`,
+      costs: {
+        shotstack_cost: estimatedCost,
+        elevenlabs_cost: (config.enhancedText.length / 1000) * 0.018,
+        total_cost: estimatedCost + (config.enhancedText.length / 1000) * 0.018
+      }
+    };
   }
 
   /**
