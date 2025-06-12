@@ -58,11 +58,12 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
-      // DEBUG: Show environment variables in error message
-      console.log('🔍 SANDBOX KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
-      console.log('🔍 PRODUCTION KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
-      console.log('🔍 ANTHROPIC KEY:', process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY);
-      console.log('🔍 ALL NEXT_PUBLIC:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
+      // IMMEDIATE CONSOLE TEST
+      console.log('🚨 ENVIRONMENT VARIABLE TEST - REDDIT AUTOMATION PAGE');
+      console.log('NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
+      console.log('NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
+      console.log('NEXT_PUBLIC_ANTHROPIC_API_KEY:', process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY);
+      console.log('ALL NEXT_PUBLIC vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
       
       // Initialize services (NO dynamic imports - all bundled in static build)
       const redditScraper = new RedditScraperService();
@@ -140,6 +141,15 @@ const VideoGenerator = () => {
             <p className="text-xs text-gray-500 mt-2">
               ✨ Build configuration updated - Environment variables should be available
             </p>
+            
+            {/* ENVIRONMENT VARIABLE TEST */}
+            <div className="mt-4 p-4 bg-red-900 border border-red-500 rounded">
+              <h2 className="text-white font-bold">🔍 ENV TEST</h2>
+              <p className="text-white text-sm">SHOTSTACK_SANDBOX: {process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? 'SET' : 'UNDEFINED'}</p>
+              <p className="text-white text-sm">SHOTSTACK_PRODUCTION: {process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? 'SET' : 'UNDEFINED'}</p>
+              <p className="text-white text-sm">ANTHROPIC: {process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY ? 'SET' : 'UNDEFINED'}</p>
+              <p className="text-xs text-gray-300">Check console for actual values</p>
+            </div>
           </div>
         </div>
       </div>
