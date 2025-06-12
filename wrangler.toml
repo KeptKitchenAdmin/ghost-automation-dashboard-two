@@ -3,12 +3,5 @@ name = "ghost-automation-dashboard-three"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "out"
 
-[build]
-command = "npm run build"
-cwd = "."
-watch_dir = "."
-
-[build.environment_variables]
-NODE_VERSION = "18"
-
 # NO WORKERS - Pages only
+# Build configuration is handled by Cloudflare Pages dashboard
