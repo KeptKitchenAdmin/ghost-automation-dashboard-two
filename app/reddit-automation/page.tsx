@@ -13,7 +13,8 @@ const VideoGenerator = () => {
     category: 'drama',
     duration: 300, // 5 minutes default
     voiceId: 'Adam',
-    startTime: 0 // Start time in seconds for YouTube video trimming
+    startTime: 0, // Start time in seconds for YouTube video trimming
+    useProduction: false // Toggle between sandbox and production APIs
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -60,7 +61,7 @@ const VideoGenerator = () => {
       // Initialize services (NO dynamic imports - all bundled in static build)
       const redditScraper = new RedditScraperService();
       const claudeService = new ClaudeService();
-      const shotstackService = new ShotstackService();
+      const shotstackService = new ShotstackService(undefined, settings.useProduction);
       const youtubeDownloader = new YouTubeDownloaderService();
 
       // Step 1: Download YouTube video to R2 storage (24-hour expiration)
@@ -80,7 +81,7 @@ const VideoGenerator = () => {
       const enhancedScript = await claudeService.enhanceStory(selectedStory, settings.duration / 60);
 
       // Step 4: 🔒 SECOND API CALL - Shotstack pipeline (voiceover + video composition)
-      setProgress('🎬 Generating video with Shotstack...');
+      setProgress(`🎬 Generating video with Shotstack (${settings.useProduction ? 'Production' : 'Sandbox'})...`);
       const videoResult = await shotstackService.generateVideoWithShotstack({
         enhancedText: enhancedScript,
         backgroundVideoUrl: backgroundVideoUrl,
@@ -238,6 +239,40 @@ const VideoGenerator = () => {
               </select>
             </div>
 
+            {/* API Mode Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                API Mode
+              </label>
+              <div className="flex items-center gap-4 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="apiMode"
+                    checked={!settings.useProduction}
+                    onChange={() => setSettings(prev => ({ ...prev, useProduction: false }))}
+                    className="text-blue-500"
+                    disabled={isGenerating}
+                  />
+                  <span className="text-white">Sandbox (Testing)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="apiMode"
+                    checked={settings.useProduction}
+                    onChange={() => setSettings(prev => ({ ...prev, useProduction: true }))}
+                    className="text-blue-500"
+                    disabled={isGenerating}
+                  />
+                  <span className="text-white">Production (Real $)</span>
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                {settings.useProduction ? 'Uses real API credits - costs real money' : 'Free testing mode with watermarks'}
+              </p>
+            </div>
+
             {/* Cost Estimate */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -246,7 +281,9 @@ const VideoGenerator = () => {
               <div className="px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg">
                 <div className="flex items-center gap-2">
                   <DollarSign size={16} className="text-green-400" />
-                  <span className="text-white font-medium">${estimatedCost().toFixed(2)}</span>
+                  <span className="text-white font-medium">
+                    {settings.useProduction ? `$${estimatedCost().toFixed(2)}` : '$0.00 (Sandbox)'}
+                  </span>
                 </div>
               </div>
             </div>

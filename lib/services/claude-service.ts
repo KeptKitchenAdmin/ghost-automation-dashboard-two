@@ -18,10 +18,10 @@ export class ClaudeService {
   private static totalTokensToday = 0;
 
   constructor() {
-    // Only initialize if API key is available
-    if (process.env.ANTHROPIC_API_KEY) {
+    // Only initialize if API key is available - use NEXT_PUBLIC_ prefix for browser
+    if (process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY) {
       this.anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
+        apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
       });
     }
     this.resetDailyLimitsIfNeeded();
