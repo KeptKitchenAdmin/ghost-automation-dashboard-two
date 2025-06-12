@@ -1,6 +1,7 @@
 # Cloudflare Pages Configuration (NOT Workers)
 name = "ghost-automation-dashboard-three"
 compatibility_date = "2024-01-01"
+pages_build_output_dir = "out"
 
 [build]
 command = "npm run build"
@@ -9,8 +10,5 @@ watch_dir = "."
 
 [build.environment_variables]
 NODE_VERSION = "18"
-
-# Cloudflare Pages settings
-pages_build_output_dir = "out"
 
 # NO WORKERS - Pages only
