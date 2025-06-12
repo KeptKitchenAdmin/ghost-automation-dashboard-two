@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Enable static export for Cloudflare Pages
+  // STATIC EXPORT for Cloudflare Pages
+  output: 'export', // This generates static files only
   images: {
     unoptimized: true,
   },
@@ -8,6 +9,11 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   trailingSlash: true,
+  
+  // Remove server-side packages since we're going static
+  // experimental: {
+  //   serverComponentsExternalPackages: ['@aws-sdk/client-s3'],
+  // },
   // COMPLETELY disable webpack cache to prevent ANY .pack files
   webpack: (config, { dev, isServer }) => {
     // Disable ALL caching regardless of environment
