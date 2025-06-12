@@ -1,10 +1,7 @@
 // YouTube Video URL Handler
 // Tests direct YouTube URLs with Shotstack (no third-party APIs)
 
-import { R2StorageService } from './r2-storage';
-
 export class YouTubeDownloaderService {
-  private r2Storage: R2StorageService;
   private isProcessing = false;
   
   // Daily limits to prevent abuse
@@ -16,7 +13,6 @@ export class YouTubeDownloaderService {
   };
 
   constructor() {
-    this.r2Storage = new R2StorageService();
     this.resetDailyLimitsIfNeeded();
   }
 
@@ -62,9 +58,6 @@ export class YouTubeDownloaderService {
 
   // Get current usage stats
   static getCurrentUsage() {
-    const service = new YouTubeDownloaderService();
-    service.resetDailyLimitsIfNeeded();
-    
     return {
       downloadsToday: this.dailyDownloads,
       maxDownloads: this.DAILY_LIMITS.MAX_DOWNLOADS,
