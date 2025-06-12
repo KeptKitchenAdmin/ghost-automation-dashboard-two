@@ -22,7 +22,7 @@ export const Sidebar = () => {
   const pathname = usePathname()
 
   return (
-    <div className="sidebar">
+    <div className="w-64 bg-gray-850 border-r border-gray-700 min-h-screen flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-gray-700">
         <div className="flex items-center space-x-3">
