@@ -16,7 +16,12 @@ export class ShotstackService {
   private productionUrl = 'https://api.shotstack.io/v1'
 
   constructor(apiKey?: string, isProduction = false) {
-    this.apiKey = apiKey || process.env.SHOTSTACK_API_KEY || ''
+    // Use sandbox key for staging, production key for production
+    if (isProduction) {
+      this.apiKey = apiKey || process.env.SHOTSTACK_PRODUCTION_API_KEY || process.env.SHOTSTACK_API_KEY || ''
+    } else {
+      this.apiKey = apiKey || process.env.SHOTSTACK_SANDBOX_API_KEY || process.env.SHOTSTACK_API_KEY || ''
+    }
     this.baseUrl = isProduction ? this.productionUrl : this.stagingUrl
   }
 
