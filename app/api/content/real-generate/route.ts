@@ -30,7 +30,8 @@ interface RealContentResponse {
 
 function executeRealContentGeneration(request: RealContentRequest): Promise<any> {
   return new Promise((resolve, reject) => {
-    const backendPath = path.join(process.cwd(), '..')
+    // Use environment variable or fallback to relative path for Cloudflare Pages compatibility
+    const backendPath = process.env.BACKEND_PATH || '../'
     
     const inputData = {
       content_type: request.contentType,

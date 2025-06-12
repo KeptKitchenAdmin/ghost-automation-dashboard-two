@@ -14,16 +14,16 @@ export class R2StorageService {
   private bucketName: string
   private region = 'auto'
 
-  constructor(config: {
-    accountId: string
-    accessKeyId: string
-    secretAccessKey: string
-    bucketName: string
+  constructor(config?: {
+    accountId?: string
+    accessKeyId?: string
+    secretAccessKey?: string
+    bucketName?: string
   }) {
-    this.accountId = config.accountId
-    this.accessKeyId = config.accessKeyId
-    this.secretAccessKey = config.secretAccessKey
-    this.bucketName = config.bucketName
+    this.accountId = config?.accountId || process.env.CLOUDFLARE_ACCOUNT_ID || ''
+    this.accessKeyId = config?.accessKeyId || process.env.R2_ACCESS_KEY_ID || ''
+    this.secretAccessKey = config?.secretAccessKey || process.env.R2_SECRET_ACCESS_KEY || ''
+    this.bucketName = config?.bucketName || process.env.R2_BUCKET_NAME || 'ghosttrace-output'
   }
 
   /**
@@ -33,7 +33,7 @@ export class R2StorageService {
     file: Blob, 
     key: string, 
     metadata?: Record<string, string>
-  ): Promise<APIResponse<R2StorageFile>> {
+  ): Promise<APIResponse<R2StorageFile> | string> {
     const requestId = `r2_upload_${Date.now()}`
     
     try {
@@ -69,6 +69,11 @@ export class R2StorageService {
 
       await this.logUsage(usageStats)
 
+      // Return just the URL for simplified usage
+      if (arguments.length === 3 && typeof metadata === 'string') {
+        return mockUrl;
+      }
+
       return {
         success: true,
         data: r2File,
@@ -77,6 +82,10 @@ export class R2StorageService {
         usageStats
       }
     } catch (error) {
+      if (arguments.length === 3 && typeof metadata === 'string') {
+        throw error;
+      }
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'R2 upload failed',
@@ -374,6 +383,44 @@ export class R2StorageService {
         requestId,
         timestamp: new Date().toISOString()
       }
+    }
+  }
+
+  /**
+   * Log API usage for monitoring (Phase 6 addition)
+   */
+  async logAPIUsage(
+    service: string,
+    cost: number,
+    metadata: Record<string, any>
+  ): Promise<void> {
+    const requestId = `r2_log_${Date.now()}`
+    
+    try {
+      // Phase 6: Log usage data to storage
+      const logData = {
+        service,
+        cost,
+        metadata,
+        timestamp: new Date().toISOString(),
+        requestId
+      }
+      
+      // In a real implementation, this would upload to R2
+      // For now, store in localStorage for development
+      const logs = JSON.parse(localStorage.getItem('api_usage_logs') || '[]')
+      logs.push(logData)
+      
+      // Keep only last 100 logs
+      if (logs.length > 100) {
+        logs.splice(0, logs.length - 100)
+      }
+      
+      localStorage.setItem('api_usage_logs', JSON.stringify(logs))
+      console.log(`📊 API usage logged: ${service} - $${cost.toFixed(3)}`)
+      
+    } catch (error) {
+      console.error('Failed to log API usage:', error)
     }
   }
 }

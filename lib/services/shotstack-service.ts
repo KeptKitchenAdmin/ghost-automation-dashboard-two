@@ -467,7 +467,7 @@ export class ShotstackService {
   }
 
   /**
-   * Generate video with Shotstack - wrapper method for Reddit automation page
+   * Generate video with Shotstack - REAL implementation for Reddit automation
    */
   async generateVideoWithShotstack(config: {
     enhancedText: string;
@@ -492,30 +492,182 @@ export class ShotstackService {
       throw new Error('Shotstack API key not configured');
     }
 
-    // For now, simulate the video generation
-    // In a full implementation, this would:
-    // 1. Generate audio with ElevenLabs
-    // 2. Create video timeline
-    // 3. Submit to Shotstack
-    // 4. Poll for completion
-    // 5. Return final URLs
+    console.log('🎬 Starting REAL Shotstack video generation workflow');
 
-    console.log('🎬 Shotstack: Simulating video generation workflow');
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const estimatedCost = this.calculateRenderCost(config.duration);
-    
-    return {
-      videoUrl: `https://shotstack-simulation.com/video_${Date.now()}.mp4`,
-      audioUrl: `https://shotstack-simulation.com/audio_${Date.now()}.mp3`,
-      costs: {
-        shotstack_cost: estimatedCost,
-        elevenlabs_cost: (config.enhancedText.length / 1000) * 0.018,
-        total_cost: estimatedCost + (config.enhancedText.length / 1000) * 0.018
+    try {
+      // Step 1: Use the provided background video URL (already processed by caller)
+      // The YouTube download is now handled in the main component before calling Shotstack
+      console.log('🎥 Using background video:', config.backgroundVideoUrl);
+
+      // Step 2: Generate voiceover with ElevenLabs through Shotstack
+      console.log('🎤 Generating voiceover with ElevenLabs...');
+      const voiceoverAsset = await this.createVoiceoverAsset(
+        config.enhancedText,
+        config.voiceSettings.voice_id
+      );
+
+      // Wait for voiceover asset to be ready
+      const voiceoverUrl = await this.pollAssetStatus(voiceoverAsset.id);
+
+      // Step 3: Create video composition
+      console.log('🎥 Creating video composition...');
+      const renderJob = await this.createVideoRender({
+        audioUrl: voiceoverUrl.url,
+        backgroundVideoUrl: backgroundVideoUrl,
+        duration: config.duration,
+        addCaptions: config.addCaptions,
+        captionText: config.enhancedText
+      });
+
+      // Step 4: Poll for render completion
+      console.log('⏳ Waiting for video render to complete...');
+      const completedVideo = await this.pollRenderCompletion(renderJob.id);
+
+      // Step 5: Calculate actual costs
+      const shotstackCost = this.calculateRenderCost(config.duration);
+      const elevenlabsCost = (config.enhancedText.length / 1000) * 0.018;
+
+      // Update daily usage tracking
+      ShotstackService.dailyRenders++;
+      ShotstackService.dailyCost += shotstackCost + elevenlabsCost;
+      ShotstackService.dailyMinutes += config.duration / 60;
+
+      console.log(`✅ Video generation complete! Total cost: $${(shotstackCost + elevenlabsCost).toFixed(2)}`);
+
+      return {
+        videoUrl: completedVideo.url,
+        audioUrl: voiceoverUrl.url,
+        costs: {
+          shotstack_cost: shotstackCost,
+          elevenlabs_cost: elevenlabsCost,
+          total_cost: shotstackCost + elevenlabsCost
+        }
+      };
+
+    } catch (error) {
+      console.error('Shotstack video generation failed:', error);
+      throw new Error(`Video generation failed: ${error.message}`);
+    }
+  }
+
+  private async createVoiceoverAsset(text: string, voiceId: string): Promise<{ id: string }> {
+    const response = await fetch(`${this.baseUrl}/assets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': this.apiKey
+      },
+      body: JSON.stringify({
+        provider: 'elevenlabs',
+        options: {
+          type: 'text-to-speech',
+          text: text,
+          voice: voiceId
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create voiceover: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { id: data.data.id };
+  }
+
+  private async createVideoRender(params: {
+    audioUrl: string;
+    backgroundVideoUrl: string;
+    duration: number;
+    addCaptions: boolean;
+    captionText: string;
+  }): Promise<{ id: string }> {
+    const timeline = {
+      background: '#000000',
+      tracks: [
+        // Audio track
+        {
+          clips: [{
+            asset: {
+              type: 'audio',
+              src: params.audioUrl
+            },
+            start: 0,
+            length: params.duration
+          }]
+        },
+        // Background video track
+        {
+          clips: [{
+            asset: {
+              type: 'video',
+              src: params.backgroundVideoUrl
+            },
+            start: 0,
+            length: params.duration,
+            fit: 'crop',
+            scale: 1.0
+          }]
+        }
+      ]
+    };
+
+    // Add captions if requested
+    if (params.addCaptions) {
+      const captionClips = this.generateCaptionClips(params.captionText, params.duration);
+      timeline.tracks.push({
+        clips: captionClips
+      });
+    }
+
+    const renderRequest = {
+      timeline,
+      output: {
+        format: 'mp4',
+        resolution: 'hd',
+        size: {
+          width: 1080,
+          height: 1920 // Vertical format for YouTube Shorts
+        }
       }
     };
+
+    const response = await fetch(`${this.baseUrl}/render`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': this.apiKey
+      },
+      body: JSON.stringify(renderRequest)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create render: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { id: data.response.id };
+  }
+
+  private async pollRenderCompletion(renderId: string): Promise<{ url: string }> {
+    const maxAttempts = 120; // 10 minutes max
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      const status = await this.getRenderStatus(renderId);
+      
+      if (status.data.status === 'done') {
+        return { url: status.data.downloadUrl! };
+      } else if (status.data.status === 'failed') {
+        throw new Error(`Render failed: ${status.data.error || 'Unknown error'}`);
+      }
+
+      // Wait 5 seconds between checks
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      attempts++;
+    }
+
+    throw new Error('Render timeout - video processing took too long');
   }
 
   /**
@@ -547,5 +699,34 @@ export class ShotstackService {
         timestamp: new Date().toISOString()
       }
     }
+  }
+
+  // Static usage tracking for Phase 6 compatibility
+  private static dailyRenders = 0;
+  private static dailyCost = 0;
+  private static dailyMinutes = 0;
+  private static lastResetDate = new Date().toDateString();
+  private static readonly DAILY_LIMITS = {
+    MAX_CALLS: 10,
+    MAX_COST: 5.00,
+    MAX_MINUTES: 12.5
+  };
+
+  static getCurrentUsage() {
+    const today = new Date().toDateString();
+    if (this.lastResetDate !== today) {
+      this.dailyRenders = 0;
+      this.dailyCost = 0;
+      this.dailyMinutes = 0;
+      this.lastResetDate = today;
+    }
+
+    return {
+      rendersToday: this.dailyRenders,
+      costToday: this.dailyCost,
+      minutesToday: this.dailyMinutes,
+      limits: this.DAILY_LIMITS,
+      resetDate: this.lastResetDate
+    };
   }
 }

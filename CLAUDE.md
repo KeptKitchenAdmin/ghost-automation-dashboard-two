@@ -15,6 +15,7 @@ This is an AI automation agency platform with Claude-powered income systems. The
 - **Repository Name:** ghost-automation-dashboard-two
 - **GitHub URL:** github.com/KeptKitchenAdmin/ghost-automation-dashboard-two
 - **Pages Project:** ghost-automation-dashboard-three
+- **Current Deployment:** https://e1a52479.ghost-automation-dashboard-three.pages.dev
 - **This is the ONLY repository for this project - all work is done here**
 
 ### **Deployment Process (Cloudflare Pages):**

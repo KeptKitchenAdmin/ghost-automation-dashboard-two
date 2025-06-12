@@ -549,6 +549,41 @@ export class RedditCacheService {
     
     console.log(`🔄 Force refresh initiated for category: ${category}`)
   }
+
+  /**
+   * Get cached usage statistics
+   */
+  getCachedUsageStats(): any {
+    try {
+      const cached = localStorage.getItem('usage_stats_cache')
+      if (cached) {
+        const data = JSON.parse(cached)
+        // Check if cache is still valid (5 minutes)
+        if (Date.now() - data.timestamp < 300000) {
+          return data.stats
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to get cached usage stats:', error)
+      return null
+    }
+  }
+
+  /**
+   * Cache usage statistics
+   */
+  cacheUsageStats(stats: any): void {
+    try {
+      const cacheData = {
+        stats,
+        timestamp: Date.now()
+      }
+      localStorage.setItem('usage_stats_cache', JSON.stringify(cacheData))
+    } catch (error) {
+      console.error('Failed to cache usage stats:', error)
+    }
+  }
 }
 
 // Export singleton instance
