@@ -240,3 +240,4 @@ cache/
 **/*.pack
 **/cache/webpack/
 .next/cache/webpack/
+.vercel/
