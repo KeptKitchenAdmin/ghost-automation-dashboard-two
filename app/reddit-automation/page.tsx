@@ -157,7 +157,7 @@ const VideoGenerator = () => {
                 disabled={isGenerating}
               />
               <p className="mt-2 text-xs text-gray-500">
-                Paste any YouTube URL. Uses RapidAPI for download links (compatible with Cloudflare Pages).
+                Paste any YouTube URL. Testing direct YouTube URLs with Shotstack (no external downloads needed).
               </p>
             </div>
 
