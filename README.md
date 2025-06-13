@@ -1,4 +1,4 @@
-# Ghost Automation Dashboard - TypeScript Version
+# Ghost Automation Dashboard - Pages Deploy Test
 
 Pure TypeScript implementation of the AI automation dashboard, optimized for Cloudflare Workers deployment.
 
