@@ -37,28 +37,34 @@ export async function onRequestPost(context) {
       }
     });
     
-    // Select correct API key based on mode
+    // Select correct API key and Owner ID based on mode
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 
       : env.SHOTSTACK_SANDBOX_API_KEY;
     
-    if (!apiKey) {
+    const ownerId = useProduction
+      ? env.SHOTSTACK_PRODUCTION_OWNER_ID
+      : env.SHOTSTACK_SANDBOX_OWNER_ID;
+    
+    if (!apiKey || !ownerId) {
       const mode = useProduction ? 'Production' : 'Sandbox';
       const debugInfo = {
         mode,
+        hasApiKey: !!apiKey,
+        hasOwnerId: !!ownerId,
         availableKeys: Object.keys(env).filter(key => key.includes('SHOTSTACK')),
         allEnvKeys: Object.keys(env).length
       };
-      console.error('❌ Server: API key missing:', debugInfo);
-      throw new Error(`${mode} Shotstack API key not configured - Debug: ${JSON.stringify(debugInfo)}`);
+      console.error('❌ Server: Missing Shotstack credentials:', debugInfo);
+      throw new Error(`${mode} Shotstack API key or Owner ID not configured - Debug: ${JSON.stringify(debugInfo)}`);
     }
     
     // Step 1: Create voiceover with ElevenLabs (via Shotstack)
     console.log('🎤 Server: Creating voiceover...');
-    const voiceoverAsset = await createVoiceoverAsset(enhancedScript, voiceSettings.voice_id, apiKey, useProduction);
+    const voiceoverAsset = await createVoiceoverAsset(enhancedScript, voiceSettings.voice_id, apiKey, ownerId, useProduction);
     
     // Step 2: Wait for voiceover to be ready
-    const voiceoverUrl = await pollAssetStatus(voiceoverAsset.id, apiKey, useProduction);
+    const voiceoverUrl = await pollAssetStatus(voiceoverAsset.id, apiKey, ownerId, useProduction);
     
     // Step 3: Create video composition
     console.log('🎥 Server: Creating video composition...');
@@ -69,11 +75,11 @@ export async function onRequestPost(context) {
       startTime,
       addCaptions,
       captionText: enhancedScript
-    }, apiKey, useProduction);
+    }, apiKey, ownerId, useProduction);
     
     // Step 4: Poll for render completion
     console.log('⏳ Server: Waiting for render completion...');
-    const completedVideo = await pollRenderCompletion(renderJob.id, apiKey, useProduction);
+    const completedVideo = await pollRenderCompletion(renderJob.id, apiKey, ownerId, useProduction);
     
     // Step 5: Calculate costs
     const costs = calculateCosts(duration, enhancedScript.length, useProduction);
@@ -104,7 +110,7 @@ export async function onRequestPost(context) {
 }
 
 // Shotstack API integration functions
-async function createVoiceoverAsset(text, voiceId, apiKey, isProduction) {
+async function createVoiceoverAsset(text, voiceId, apiKey, ownerId, isProduction) {
   const baseUrl = isProduction 
     ? 'https://api.shotstack.io/v1' 
     : 'https://api.shotstack.io/stage';
@@ -113,7 +119,8 @@ async function createVoiceoverAsset(text, voiceId, apiKey, isProduction) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey
+      'x-api-key': apiKey,
+      'x-shotstack-owner': ownerId
     },
     body: JSON.stringify({
       provider: 'elevenlabs',
@@ -133,7 +140,7 @@ async function createVoiceoverAsset(text, voiceId, apiKey, isProduction) {
   return { id: data.data.id };
 }
 
-async function createVideoRender(params, apiKey, isProduction) {
+async function createVideoRender(params, apiKey, ownerId, isProduction) {
   const baseUrl = isProduction 
     ? 'https://api.shotstack.io/v1' 
     : 'https://api.shotstack.io/stage';
@@ -194,7 +201,8 @@ async function createVideoRender(params, apiKey, isProduction) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey
+      'x-api-key': apiKey,
+      'x-shotstack-owner': ownerId
     },
     body: JSON.stringify(renderRequest)
   });
@@ -207,7 +215,7 @@ async function createVideoRender(params, apiKey, isProduction) {
   return { id: data.response.id };
 }
 
-async function pollAssetStatus(assetId, apiKey, isProduction) {
+async function pollAssetStatus(assetId, apiKey, ownerId, isProduction) {
   const baseUrl = isProduction 
     ? 'https://api.shotstack.io/v1' 
     : 'https://api.shotstack.io/stage';
@@ -217,7 +225,10 @@ async function pollAssetStatus(assetId, apiKey, isProduction) {
   
   while (attempts < maxAttempts) {
     const response = await fetch(`${baseUrl}/assets/${assetId}`, {
-      headers: { 'x-api-key': apiKey }
+      headers: { 
+        'x-api-key': apiKey,
+        'x-shotstack-owner': ownerId
+      }
     });
     
     if (!response.ok) {
@@ -240,7 +251,7 @@ async function pollAssetStatus(assetId, apiKey, isProduction) {
   throw new Error('Asset generation timeout');
 }
 
-async function pollRenderCompletion(renderId, apiKey, isProduction) {
+async function pollRenderCompletion(renderId, apiKey, ownerId, isProduction) {
   const baseUrl = isProduction 
     ? 'https://api.shotstack.io/v1' 
     : 'https://api.shotstack.io/stage';
@@ -250,7 +261,10 @@ async function pollRenderCompletion(renderId, apiKey, isProduction) {
   
   while (attempts < maxAttempts) {
     const response = await fetch(`${baseUrl}/render/${renderId}`, {
-      headers: { 'x-api-key': apiKey }
+      headers: { 
+        'x-api-key': apiKey,
+        'x-shotstack-owner': ownerId
+      }
     });
     
     if (!response.ok) {
