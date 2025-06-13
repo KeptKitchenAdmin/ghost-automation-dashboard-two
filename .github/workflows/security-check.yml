@@ -127,7 +127,7 @@ jobs:
   cloudflare-security:
     name: ☁️ Cloudflare Security Check
     runs-on: ubuntu-latest
-    if: false
+    if: github.ref == 'refs/heads/main'
     
     steps:
     - name: 🔍 Checkout code
