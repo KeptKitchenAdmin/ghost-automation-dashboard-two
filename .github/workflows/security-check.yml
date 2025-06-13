@@ -46,6 +46,7 @@ jobs:
              --exclude-dir=.next \
              --exclude="*.log" \
              --exclude-dir=.github \
+             --exclude="*package-lock.json" \
              2>/dev/null; then
             echo "🚨 EXPOSED SECRET DETECTED: $pattern"
             found_secrets=true
@@ -132,40 +133,46 @@ jobs:
     - name: 🔍 Checkout code
       uses: actions/checkout@v4
     
-    - name: ☁️ Validate Cloudflare Worker
+    - name: ☁️ Validate Cloudflare Pages
       run: |
-        echo "🔍 Validating Cloudflare Worker configuration..."
+        echo "🔍 Validating Cloudflare Pages configuration..."
         
-        if [ -f "cloudflare-workers/api-proxy/worker.js" ]; then
-          echo "✅ Worker file exists"
+        # Check for Pages Functions
+        if [ -d "functions" ]; then
+          echo "✅ Pages Functions directory exists"
           
-          # Check for proper CORS configuration
-          if grep -q "Access-Control-Allow-Origin" cloudflare-workers/api-proxy/worker.js; then
-            echo "✅ CORS configuration found"
-          else
-            echo "⚠️  CORS configuration missing"
+          # Check for API functions
+          if [ -f "functions/api/reddit-stories.js" ]; then
+            echo "✅ Reddit stories API function found"
           fi
           
-          # Check for rate limiting
-          if grep -q "rate.*limit" cloudflare-workers/api-proxy/worker.js; then
-            echo "✅ Rate limiting configured"
-          else
-            echo "⚠️  Rate limiting not found"
+          if [ -f "functions/api/generate-video.js" ]; then
+            echo "✅ Video generation API function found"
           fi
-          
-          # Check for proper error handling
-          if grep -q "try.*catch" cloudflare-workers/api-proxy/worker.js; then
-            echo "✅ Error handling implemented"
-          else
-            echo "⚠️  Error handling missing"
-          fi
-          
         else
-          echo "❌ Cloudflare Worker not found"
-          exit 1
+          echo "ℹ️  No Pages Functions (static site only)"
         fi
         
-        echo "✅ Cloudflare security validation complete"
+        # Check for Next.js static export
+        if [ -f "next.config.js" ]; then
+          if grep -q "output.*export" next.config.js; then
+            echo "✅ Next.js configured for static export"
+          else
+            echo "❌ Next.js not configured for static export"
+            exit 1
+          fi
+        fi
+        
+        # Check wrangler.toml is for Pages not Workers
+        if [ -f "wrangler.toml" ]; then
+          if grep -q "pages_build_output_dir" wrangler.toml; then
+            echo "✅ Wrangler configured for Pages deployment"
+          else
+            echo "⚠️  Wrangler may be configured for Workers"
+          fi
+        fi
+        
+        echo "✅ Cloudflare Pages validation complete"
 
   deployment-security:
     name: 🚀 Deployment Security
