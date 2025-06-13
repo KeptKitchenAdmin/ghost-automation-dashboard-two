@@ -47,6 +47,7 @@ jobs:
              --exclude="*.log" \
              --exclude-dir=.github \
              --exclude="*package-lock.json" \
+             --exclude="*.tsbuildinfo" \
              2>/dev/null; then
             echo "🚨 EXPOSED SECRET DETECTED: $pattern"
             found_secrets=true
