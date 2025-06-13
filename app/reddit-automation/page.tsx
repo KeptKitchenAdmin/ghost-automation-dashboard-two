@@ -3,9 +3,6 @@
 import React, { useState } from 'react';
 import { Video, Download, DollarSign, Clock, AlertCircle, Play } from 'lucide-react';
 import { RedditScraperService } from '../../lib/services/reddit-scraper';
-import { ClaudeService } from '../../lib/services/claude-service';
-import { ShotstackService } from '../../lib/services/shotstack-service';
-import { YouTubeDownloaderService } from '../../lib/services/youtube-downloader';
 
 const VideoGenerator = () => {
   const [settings, setSettings] = useState({
@@ -46,7 +43,7 @@ const VideoGenerator = () => {
     return shotstackCost + claudeCost + elevenlabsCost;
   };
 
-  // 🚨 SINGLE UNIFIED PIPELINE - NO SEPARATE API CALLS
+  // 🔒 SECURE SERVER-SIDE API CALL - NO EXPOSED KEYS
   const generateVideo = async () => {
     if (!settings.youtubeUrl.trim()) {
       setError('Please enter a YouTube URL');
@@ -58,58 +55,56 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
-      // IMMEDIATE CONSOLE TEST
-      console.log('🚨 ENVIRONMENT VARIABLE TEST - REDDIT AUTOMATION PAGE');
-      console.log('NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY);
-      console.log('NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY:', process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY);
-      console.log('NEXT_PUBLIC_ANTHROPIC_API_KEY:', process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY);
-      console.log('ALL NEXT_PUBLIC vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')));
-      
-      // Initialize services (NO dynamic imports - all bundled in static build)
-      const redditScraper = new RedditScraperService();
-      const claudeService = new ClaudeService();
-      const shotstackService = new ShotstackService(undefined, settings.useProduction);
-      const youtubeDownloader = new YouTubeDownloaderService();
-
-      // Step 1: Download YouTube video to R2 storage (24-hour expiration)
-      setProgress('📥 Getting YouTube video download link...');
-      const backgroundVideoUrl = await youtubeDownloader.downloadYouTubeVideo(settings.youtubeUrl, settings.duration);
-
-      // Step 2: Find viral Reddit story (NO external API - uses public JSON)
+      // Step 1: Find viral Reddit story (client-side, no API keys needed)
       setProgress('🔍 Finding viral Reddit story...');
+      const redditScraper = new RedditScraperService();
       const stories = await redditScraper.scrapeRedditStories(settings.category, 5);
       if (stories.length === 0) {
         throw new Error('No suitable stories found in this category');
       }
-      const selectedStory = stories[0]; // Use highest scoring story
+      const selectedStory = stories[0];
 
-      // Step 3: 🔒 FIRST API CALL - Claude enhancement (30-60 seconds)
-      setProgress('✨ Enhancing story with Claude AI...');
-      const enhancedScript = await claudeService.enhanceStory(selectedStory, settings.duration / 60);
-
-      // Step 4: 🔒 SECOND API CALL - Shotstack pipeline (voiceover + video composition)
-      setProgress(`🎬 Generating video with Shotstack (${settings.useProduction ? 'Production' : 'Sandbox'})...`);
-      const videoResult = await shotstackService.generateVideoWithShotstack({
-        enhancedText: enhancedScript,
-        backgroundVideoUrl: backgroundVideoUrl,
-        voiceSettings: {
-          voice_id: settings.voiceId,
-          stability: 0.75,
-          similarity_boost: 0.85
+      // Step 2: 🔒 SECURE API CALL - Server handles all external APIs
+      setProgress('🎬 Generating video (server processing)...');
+      
+      const response = await fetch('/api/reddit-automation/generate-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        duration: settings.duration,
-        startTime: settings.startTime, // Pass trim start time
-        addCaptions: true
+        body: JSON.stringify({
+          story: selectedStory,
+          background_url: settings.youtubeUrl,
+          voice_settings: {
+            voice_id: settings.voiceId,
+            stability: 0.75,
+            similarity_boost: 0.85
+          },
+          video_config: {
+            duration: settings.duration,
+            startTime: settings.startTime,
+            useProduction: settings.useProduction,
+            addCaptions: true
+          }
+        })
       });
 
-      // Step 5: 🔒 API CALLS COMPLETE - Display result
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Video generation failed');
+      }
+
+      // Step 3: ✅ SECURE - Server processed everything safely
       setProgress('✅ Video generation complete!');
       setGeneratedVideo({
-        videoUrl: videoResult.videoUrl,
-        audioUrl: videoResult.audioUrl,
-        costs: videoResult.costs,
+        jobId: result.jobId,
         story: selectedStory,
-        script: enhancedScript
+        message: result.message
       });
 
     } catch (error) {
@@ -117,7 +112,6 @@ const VideoGenerator = () => {
       setError(error.message || 'Video generation failed');
     } finally {
       setIsGenerating(false);
-      // 🚨 NO MORE API CALLS UNTIL NEXT USER-TRIGGERED GENERATION
     }
   };
 
@@ -139,17 +133,8 @@ const VideoGenerator = () => {
             <h1 className="text-3xl font-bold text-white mb-2">Reddit Story Video Generator</h1>
             <p className="text-gray-400">Transform viral Reddit stories into YouTube videos</p>
             <p className="text-xs text-gray-500 mt-2">
-              ✨ NEXT.CONFIG FIX v5 - Removed redundant env config, using native NEXT_PUBLIC_
+              🔒 SECURE ARCHITECTURE v6 - API keys safely stored server-side only
             </p>
-            
-            {/* ENVIRONMENT VARIABLE TEST */}
-            <div className="mt-4 p-4 bg-red-900 border border-red-500 rounded">
-              <h2 className="text-white font-bold">🔍 ENV TEST</h2>
-              <p className="text-white text-sm">SHOTSTACK_SANDBOX: {process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || 'MISSING'}</p>
-              <p className="text-white text-sm">SHOTSTACK_PRODUCTION: {process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || 'MISSING'}</p>
-              <p className="text-white text-sm">ANTHROPIC: {process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY || 'MISSING'}</p>
-              <p className="text-xs text-gray-300">Actual values shown above (first 10 chars)</p>
-            </div>
           </div>
         </div>
       </div>
