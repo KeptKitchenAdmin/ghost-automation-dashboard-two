@@ -65,45 +65,59 @@ export async function onRequestPost(context) {
 
 // Reddit scraping logic (server-side)
 async function scrapeRedditStories(category, limit = 5) {
-  const subredditConfigs = {
-    drama: ['AmItheAsshole', 'relationship_advice', 'tifu', 'confessions'],
-    horror: ['nosleep', 'LetsNotMeet', 'creepyencounters', 'missing411'],
-    revenge: ['MaliciousCompliance', 'pettyrevenge', 'ProRevenge', 'NuclearRevenge'],
-    wholesome: ['MadeMeSmile', 'wholesomememes', 'HumansBeingBros'],
-    mystery: ['mystery', 'UnresolvedMysteries', 'RBI', 'whatisthisthing']
+  // START WITH SINGLE SUBREDDIT - most reliable for each category
+  const primarySubreddits = {
+    drama: 'AmItheAsshole',
+    horror: 'nosleep', 
+    revenge: 'MaliciousCompliance',
+    wholesome: 'MadeMeSmile',
+    mystery: 'UnresolvedMysteries'
   };
   
-  const subreddits = subredditConfigs[category] || subredditConfigs.drama;
+  // Use only primary subreddit to avoid multiple requests
+  const targetSubreddit = primarySubreddits[category] || 'AmItheAsshole';
   const stories = [];
   
-  for (const subreddit of subreddits) {
-    try {
-      // Add delay to avoid rate limiting
-      if (stories.length > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-      }
-      
-      const response = await fetch(
-        `https://www.reddit.com/r/${subreddit}/hot.json?limit=${Math.ceil(limit / subreddits.length)}`,
-        {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Cache-Control': 'no-cache'
-          }
+  console.log(`🔍 Fetching from single subreddit: r/${targetSubreddit}`);
+  
+  try {
+    // SINGLE SUBREDDIT REQUEST with enhanced anti-bot measures
+    const response = await fetch(
+      `https://www.reddit.com/r/${targetSubreddit}/hot.json?limit=${limit}`,
+      {
+        headers: {
+          // ENHANCED USER-AGENT - Latest Chrome with realistic version
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+          'Sec-Ch-Ua-Mobile': '?0',
+          'Sec-Ch-Ua-Platform': '"Windows"',
+          'Sec-Fetch-Dest': 'empty',
+          'Sec-Fetch-Mode': 'cors',
+          'Sec-Fetch-Site': 'same-origin'
         }
-      );
-      
-      console.log(`Reddit API response for r/${subreddit}:`, response.status);
-      
-      if (!response.ok) {
-        console.warn(`Failed to fetch r/${subreddit}: ${response.status} ${response.statusText}`);
-        continue;
       }
+    );
+    
+    console.log(`🌐 Reddit API response for r/${targetSubreddit}:`, response.status, response.statusText);
+    
+    // ENHANCED ERROR HANDLING
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Reddit blocked r/${targetSubreddit}: ${response.status} ${response.statusText}`);
+      console.error(`Response body:`, errorText.substring(0, 200));
       
+      // Don't throw error, use fallback instead
+      console.log(`🔄 Using fallback story due to Reddit API error`);
+    } else {
       const data = await response.json();
       const posts = data.data.children;
+      
+      console.log(`✅ Successfully fetched ${posts.length} posts from r/${targetSubreddit}`);
       
       for (const post of posts) {
         const postData = post.data;
@@ -137,9 +151,12 @@ async function scrapeRedditStories(category, limit = 5) {
         
         stories.push(story);
       }
-    } catch (error) {
-      console.error(`Error scraping r/${subreddit}:`, error);
+      
+      console.log(`📊 Found ${stories.length} quality stories from r/${targetSubreddit}`);
     }
+  } catch (error) {
+    console.error(`❌ Error scraping r/${targetSubreddit}:`, error.message);
+    console.log(`🔄 Will use fallback story due to scraping error`);
   }
   
   // If no stories found (Reddit blocking), return fallback
