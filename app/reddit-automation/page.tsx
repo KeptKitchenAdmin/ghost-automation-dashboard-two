@@ -86,9 +86,16 @@ const VideoGenerator = () => {
           console.log('Cobalt response:', cobaltData);
           
           if (cobaltData.status === 'error') {
-            console.warn('Cobalt extraction failed:', cobaltData.error);
-            setError(`Cobalt error: ${cobaltData.error?.code || 'Unknown error'}`);
-            // Continue with original URL - backend will try other methods
+            const errorCode = cobaltData.error?.code || 'Unknown error';
+            console.warn('Cobalt extraction failed:', errorCode);
+            
+            if (errorCode === 'error.api.youtube.login') {
+              setProgress('⚠️ This YouTube video requires login or is restricted. Trying original URL...');
+              // Let backend handle it with its own methods
+            } else {
+              setError(`Cobalt error: ${errorCode}`);
+              return; // Stop if it's a real error
+            }
           } else if (cobaltData.url) {
             processedVideoUrl = cobaltData.url;
             console.log('Direct MP4 URL from Cobalt:', processedVideoUrl);
