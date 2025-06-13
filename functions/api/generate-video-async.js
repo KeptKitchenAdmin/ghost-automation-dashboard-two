@@ -51,9 +51,18 @@ export async function onRequestPost(context) {
       })
     });
     
+    console.log(`📥 Ingest response: ${ingestResponse.status} ${ingestResponse.statusText}`);
+    
     if (!ingestResponse.ok) {
       const errorText = await ingestResponse.text();
       console.error('❌ Ingest failed:', errorText);
+      console.error('❌ Request details:', {
+        url: ingestUrl,
+        method: 'POST',
+        hasApiKey: !!apiKey,
+        hasOwnerId: !!ownerId,
+        youtubeUrl: backgroundVideoUrl
+      });
       throw new Error(`Shotstack ingest failed: ${ingestResponse.status} - ${errorText}`);
     }
     

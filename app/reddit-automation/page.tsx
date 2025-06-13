@@ -111,15 +111,30 @@ const VideoGenerator = () => {
         throw new Error(videoResult.error || 'Video generation failed');
       }
 
-      // Step 3: ✅ SECURE - Server processed everything safely
-      setProgress('✅ Video generation complete!');
-      setGeneratedVideo({
-        videoUrl: videoResult.videoUrl,
-        audioUrl: videoResult.audioUrl,
-        story: storiesResult.story,
-        costs: videoResult.costs,
-        mode: videoResult.mode
-      });
+      // For async processing, show different UI
+      if (videoResult.ingest_id) {
+        setProgress('🔄 Video processing started! This will take 5-10 minutes...');
+        setGeneratedVideo({
+          videoUrl: null, // No video yet
+          audioUrl: null,
+          story: storiesResult.story,
+          costs: { shotstack_cost: 0, elevenlabs_cost: 0, total_cost: 0 },
+          mode: 'processing',
+          ingest_id: videoResult.ingest_id,
+          status_url: videoResult.status_check_url,
+          message: videoResult.message
+        });
+      } else {
+        // Step 3: ✅ SECURE - Server processed everything safely
+        setProgress('✅ Video generation complete!');
+        setGeneratedVideo({
+          videoUrl: videoResult.videoUrl,
+          audioUrl: videoResult.audioUrl,
+          story: storiesResult.story,
+          costs: videoResult.costs,
+          mode: videoResult.mode
+        });
+      }
 
     } catch (error) {
       console.error('Video generation failed:', error);
