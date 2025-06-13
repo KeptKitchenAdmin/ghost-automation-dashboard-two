@@ -54,7 +54,44 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
-      // Step 1: 🔒 SECURE - Get Reddit story via server-side function
+      // Step 1: Convert YouTube URL to direct MP4 if needed
+      let processedVideoUrl = settings.youtubeUrl;
+      
+      if (settings.youtubeUrl.includes('youtube.com') || settings.youtubeUrl.includes('youtu.be')) {
+        setProgress('🔄 Converting YouTube URL to direct MP4...');
+        
+        try {
+          const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              url: settings.youtubeUrl,
+              vCodec: "h264",
+              vQuality: "720",
+              aFormat: "mp3",
+              isAudioOnly: false
+            })
+          });
+          
+          const cobaltData = await cobaltResponse.json();
+          
+          if (cobaltData.status === 'error') {
+            console.warn('Cobalt extraction failed:', cobaltData.error);
+            // Continue with original URL - backend will try other methods
+          } else if (cobaltData.url) {
+            processedVideoUrl = cobaltData.url;
+            setProgress('✅ YouTube URL converted successfully!');
+          }
+        } catch (cobaltError) {
+          console.warn('Cobalt API error:', cobaltError);
+          // Continue with original URL - backend will handle it
+        }
+      }
+      
+      // Step 2: 🔒 SECURE - Get Reddit story via server-side function
       setProgress('🔍 Finding viral Reddit story...');
       
       const storiesResponse = await fetch('/api/reddit-stories', {
@@ -78,7 +115,7 @@ const VideoGenerator = () => {
         throw new Error(storiesResult.error || 'No suitable stories found');
       }
 
-      // Step 2: 🔒 SECURE - Generate video via server-side function
+      // Step 3: 🔒 SECURE - Generate video via server-side function
       setProgress('🎬 Generating video (server processing)...');
       
       const videoResponse = await fetch('/api/generate-video-async', {
@@ -88,7 +125,7 @@ const VideoGenerator = () => {
         },
         body: JSON.stringify({
           enhancedScript: storiesResult.enhancedScript,
-          backgroundVideoUrl: settings.youtubeUrl,
+          backgroundVideoUrl: processedVideoUrl, // Use the converted URL
           voiceSettings: {
             voice_id: settings.voiceId,
             stability: 0.75,
@@ -189,7 +226,7 @@ const VideoGenerator = () => {
               />
               <div className="mt-2 space-y-1">
                 <p className="text-xs text-green-400">
-                  ✅ YouTube URLs supported via multiple downloader APIs
+                  ✅ YouTube URLs supported via personal Cobalt instance
                 </p>
                 <p className="text-xs text-gray-500">
                   Examples: 
@@ -210,7 +247,10 @@ const VideoGenerator = () => {
                   </button>
                 </p>
                 <p className="text-xs text-gray-400">
-                  System: YouTube Extraction → Shotstack Video Editing → Final MP4
+                  Workflow: YouTube → Cobalt (your instance) → Direct MP4 → Shotstack → Final Video
+                </p>
+                <p className="text-xs text-yellow-400">
+                  🔧 Cobalt instance: cobalt-latest-qymt.onrender.com
                 </p>
               </div>
             </div>
