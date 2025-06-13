@@ -20,14 +20,9 @@ export async function onRequestPost(context) {
     console.log(`🎬 Server: Starting ASYNC Shotstack process`);
     console.log(`📹 Input URL: ${backgroundVideoUrl}`);
     
-    // Check if this is a YouTube URL and extract direct URL if needed
+    // Frontend should have already converted YouTube URLs
+    // We'll use the URL as-is since cobalt conversion happens client-side
     let actualVideoUrl = backgroundVideoUrl;
-    if (isYouTubeUrl(backgroundVideoUrl)) {
-      console.log('🔍 YouTube URL detected - extracting direct URL...');
-      const extractedData = await extractYouTubeUrl(backgroundVideoUrl);
-      actualVideoUrl = typeof extractedData === 'string' ? extractedData : extractedData.url;
-      console.log(`✅ Direct URL extracted: ${actualVideoUrl.substring(0, 50)}...`);
-    }
     
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 

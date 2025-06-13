@@ -61,6 +61,10 @@ const VideoGenerator = () => {
         setProgress('🔄 Converting YouTube URL to direct MP4...');
         
         try {
+          // Add timeout to handle Render free tier sleeping
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+          
           const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
             method: 'POST',
             headers: {
@@ -73,21 +77,37 @@ const VideoGenerator = () => {
               vQuality: "720",
               aFormat: "mp3",
               isAudioOnly: false
-            })
+            }),
+            signal: controller.signal
           });
           
+          clearTimeout(timeout);
+          
           const cobaltData = await cobaltResponse.json();
+          console.log('Cobalt response:', cobaltData);
           
           if (cobaltData.status === 'error') {
             console.warn('Cobalt extraction failed:', cobaltData.error);
+            setError(`Cobalt error: ${cobaltData.error?.code || 'Unknown error'}`);
             // Continue with original URL - backend will try other methods
           } else if (cobaltData.url) {
             processedVideoUrl = cobaltData.url;
+            console.log('Direct MP4 URL from Cobalt:', processedVideoUrl);
+            setProgress('✅ YouTube URL converted successfully!');
+          } else if (cobaltData.status === 'stream' || cobaltData.status === 'redirect') {
+            // Handle stream/redirect response format
+            processedVideoUrl = cobaltData.url;
+            console.log('Stream URL from Cobalt:', processedVideoUrl);
             setProgress('✅ YouTube URL converted successfully!');
           }
         } catch (cobaltError) {
-          console.warn('Cobalt API error:', cobaltError);
-          // Continue with original URL - backend will handle it
+          console.error('Cobalt API error:', cobaltError);
+          setProgress('⚠️ Cobalt conversion failed, using original URL');
+          // For now, don't send YouTube URLs to backend since it expects direct URLs
+          if (cobaltError.name === 'AbortError') {
+            setError('Cobalt instance may be sleeping (Render free tier). Please try again in 30 seconds.');
+            return;
+          }
         }
       }
       
@@ -139,7 +159,9 @@ const VideoGenerator = () => {
       });
 
       if (!videoResponse.ok) {
-        throw new Error(`Video API error: ${videoResponse.status}`);
+        const errorData = await videoResponse.text();
+        console.error('Video API error response:', errorData);
+        throw new Error(`Video API error: ${videoResponse.status} - ${errorData}`);
       }
 
       const videoResult = await videoResponse.json();
