@@ -25,7 +25,16 @@ export async function onRequestPost(context) {
       hasProductionKey: !!env.SHOTSTACK_PRODUCTION_API_KEY,
       sandboxKeyLength: env.SHOTSTACK_SANDBOX_API_KEY?.length || 0,
       productionKeyLength: env.SHOTSTACK_PRODUCTION_API_KEY?.length || 0,
-      useProduction
+      useProduction,
+      // Check ALL possible Shotstack key variations
+      allEnvKeys: Object.keys(env),
+      shotstackVariations: {
+        'SHOTSTACK_API_KEY': !!env.SHOTSTACK_API_KEY,
+        'SHOTSTACK_SANDBOX_API_KEY': !!env.SHOTSTACK_SANDBOX_API_KEY,
+        'SHOTSTACK_PRODUCTION_API_KEY': !!env.SHOTSTACK_PRODUCTION_API_KEY,
+        'SHOTSTACK_SANDBOX': !!env.SHOTSTACK_SANDBOX,
+        'SHOTSTACK_PRODUCTION': !!env.SHOTSTACK_PRODUCTION
+      }
     });
     
     // Select correct API key based on mode
