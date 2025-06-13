@@ -145,10 +145,10 @@ const VideoGenerator = () => {
             {/* ENVIRONMENT VARIABLE TEST */}
             <div className="mt-4 p-4 bg-red-900 border border-red-500 rounded">
               <h2 className="text-white font-bold">🔍 ENV TEST</h2>
-              <p className="text-white text-sm">SHOTSTACK_SANDBOX: {process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY ? 'SET' : 'UNDEFINED'}</p>
-              <p className="text-white text-sm">SHOTSTACK_PRODUCTION: {process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY ? 'SET' : 'UNDEFINED'}</p>
-              <p className="text-white text-sm">ANTHROPIC: {process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY ? 'SET' : 'UNDEFINED'}</p>
-              <p className="text-xs text-gray-300">Check console for actual values</p>
+              <p className="text-white text-sm">SHOTSTACK_SANDBOX: {process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY || 'MISSING'}</p>
+              <p className="text-white text-sm">SHOTSTACK_PRODUCTION: {process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY || 'MISSING'}</p>
+              <p className="text-white text-sm">ANTHROPIC: {process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY || 'MISSING'}</p>
+              <p className="text-xs text-gray-300">Actual values shown above (first 10 chars)</p>
             </div>
           </div>
         </div>
