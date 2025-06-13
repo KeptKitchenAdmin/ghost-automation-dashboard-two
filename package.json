@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "echo '❌ Use GitHub auto-deploy instead: git push origin main' && echo '✅ Cloudflare Pages will build automatically from GitHub'",
-    "deploy:functions": "npm run build && npx wrangler pages deploy .next --project-name=ghost-automation-dashboard-three --compatibility-date=2024-01-01",
+    "deploy:functions": "npm run build && npx wrangler pages deploy out --project-name=ghost-automation-dashboard-three",
     "test:api": "node test_end_to_end_workflow.ts",
     "test:performance": "node test_performance_benchmark.ts"
   },
@@ -40,7 +40,8 @@
     "react-hot-toast": "^2.4.1",
     "recharts": "^2.8.0",
     "tailwind-merge": "^2.2.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "youtubei.js": "^14.0.0"
   },
   "devDependencies": {
     "@types/form-data": "^2.5.1",

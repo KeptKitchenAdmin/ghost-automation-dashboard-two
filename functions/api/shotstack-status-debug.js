@@ -1,5 +1,5 @@
 /**
- * Check Shotstack Ingest + Render Status
+ * DEBUG: Check what Shotstack Ingest API actually returns
  */
 
 export async function onRequestGet(context) {
@@ -26,6 +26,9 @@ export async function onRequestGet(context) {
       ? 'https://api.shotstack.io/ingest/v1' 
       : 'https://api.shotstack.io/ingest/stage';
     
+    console.log(`🔍 DEBUG: Checking ingest ${ingestId}`);
+    console.log(`🔍 URL: ${ingestBaseUrl}/sources/${ingestId}`);
+    
     // Check ingest status
     const ingestResponse = await fetch(`${ingestBaseUrl}/sources/${ingestId}`, {
       headers: { 
@@ -34,36 +37,28 @@ export async function onRequestGet(context) {
       }
     });
     
-    if (!ingestResponse.ok) {
-      throw new Error(`Ingest status check failed: ${ingestResponse.statusText}`);
+    console.log(`🔍 Response status: ${ingestResponse.status} ${ingestResponse.statusText}`);
+    
+    const responseText = await ingestResponse.text();
+    console.log(`🔍 Raw response: ${responseText}`);
+    
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      responseData = { raw_response: responseText };
     }
     
-    const ingestData = await ingestResponse.json();
-    const ingestStatus = ingestData.data.attributes.status;
-    
-    console.log(`📊 Ingest status: ${ingestStatus}`);
-    
-    let result = {
-      success: true,
+    return new Response(JSON.stringify({
+      success: ingestResponse.ok,
       ingest_id: ingestId,
-      ingest_status: ingestStatus,
+      api_endpoint: `${ingestBaseUrl}/sources/${ingestId}`,
+      response_status: ingestResponse.status,
+      response_ok: ingestResponse.ok,
+      raw_response: responseText,
+      parsed_response: responseData,
       timestamp: new Date().toISOString()
-    };
-    
-    if (ingestStatus === 'failed') {
-      result.error = `Ingest failed: ${ingestData.data.attributes.error || 'Unknown error'}`;
-      result.success = false;
-    } else if (ingestStatus === 'ready') {
-      result.ingest_url = ingestData.data.attributes.url;
-      result.message = "✅ YouTube video ingested successfully! Ready for rendering.";
-      
-      // TODO: Could automatically start render here
-      // For now, just return the ingested URL
-    } else {
-      result.message = `⏳ Still processing... Status: ${ingestStatus}`;
-    }
-    
-    return new Response(JSON.stringify(result, null, 2), {
+    }, null, 2), {
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
@@ -71,11 +66,12 @@ export async function onRequestGet(context) {
     });
     
   } catch (error) {
-    console.error('❌ Status check failed:', error);
+    console.error('❌ Debug status check failed:', error);
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error.message,
+      stack: error.stack
     }), {
       status: 500,
       headers: { 

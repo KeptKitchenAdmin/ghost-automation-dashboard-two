@@ -177,19 +177,42 @@ const VideoGenerator = () => {
             {/* YouTube URL */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Background YouTube URL
+                Background Video URL
               </label>
               <input
                 type="url"
                 value={settings.youtubeUrl}
                 onChange={(e) => setSettings(prev => ({ ...prev, youtubeUrl: e.target.value }))}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder="https://youtube.com/watch?v=... or https://example.com/video.mp4"
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 disabled={isGenerating}
               />
-              <p className="mt-2 text-xs text-gray-500">
-                Paste any YouTube URL. Testing direct YouTube URLs with Shotstack (no external downloads needed).
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-green-400">
+                  ✅ YouTube URLs supported via multiple downloader APIs
+                </p>
+                <p className="text-xs text-gray-500">
+                  Examples: 
+                  <button 
+                    onClick={() => setSettings(prev => ({ ...prev, youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }))}
+                    className="ml-1 text-blue-400 hover:text-blue-300 underline"
+                    disabled={isGenerating}
+                  >
+                    YouTube
+                  </button>
+                  {' | '}
+                  <button 
+                    onClick={() => setSettings(prev => ({ ...prev, youtubeUrl: 'https://shotstack-assets.s3-ap-southeast-2.amazonaws.com/footage/beach-overhead.mp4' }))}
+                    className="ml-1 text-blue-400 hover:text-blue-300 underline"
+                    disabled={isGenerating}
+                  >
+                    Direct MP4
+                  </button>
+                </p>
+                <p className="text-xs text-gray-400">
+                  System: YouTube Extraction → Shotstack Video Editing → Final MP4
+                </p>
+              </div>
             </div>
 
             {/* Category */}
