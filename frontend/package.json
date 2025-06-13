@@ -16,7 +16,7 @@
     "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.294.0",
-    "next": "14.0.4",
+    "next": "^14.2.30",
     "openai": "^5.1.1",
     "react": "^18",
     "react-dom": "^18",
@@ -25,7 +25,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.12",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
