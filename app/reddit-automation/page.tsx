@@ -57,7 +57,7 @@ const VideoGenerator = () => {
       // Step 1: 🔒 SECURE - Get Reddit story via server-side function
       setProgress('🔍 Finding viral Reddit story...');
       
-      const storiesResponse = await fetch('/api/reddit-stories-simple', {
+      const storiesResponse = await fetch('/api/reddit-stories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const VideoGenerator = () => {
       // Step 2: 🔒 SECURE - Generate video via server-side function
       setProgress('🎬 Generating video (server processing)...');
       
-      const videoResponse = await fetch('/api/generate-video-debug', {
+      const videoResponse = await fetch('/api/generate-video-basic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
