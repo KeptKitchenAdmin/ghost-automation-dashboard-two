@@ -14,12 +14,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // ONLY necessary API keys - NO tracking
-  env: {
-    NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY,
-    NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY,
-    NEXT_PUBLIC_ANTHROPIC_API_KEY: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
-  },
+  // NEXT_PUBLIC_ variables are automatically included in static builds
   // Additional static export configuration
   experimental: {
     esmExternals: false,
