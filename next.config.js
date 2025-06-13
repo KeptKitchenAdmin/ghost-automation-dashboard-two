@@ -14,7 +14,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // FORCE environment variables to be available in static build
+  // ONLY necessary API keys - NO tracking
   env: {
     NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_SANDBOX_API_KEY,
     NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY: process.env.NEXT_PUBLIC_SHOTSTACK_PRODUCTION_API_KEY,
