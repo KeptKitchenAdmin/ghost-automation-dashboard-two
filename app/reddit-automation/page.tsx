@@ -65,25 +65,40 @@ const VideoGenerator = () => {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
           
+          // Log exact request being sent
+          const requestBody = {
+            url: settings.youtubeUrl,
+            videoQuality: "720",
+            audioFormat: "mp3",
+            youtubeVideoCodec: "h264"
+          };
+          
+          console.log('🚀 COBALT API REQUEST:');
+          console.log('Endpoint:', 'https://cobalt-latest-qymt.onrender.com/');
+          console.log('Method:', 'POST');
+          console.log('Headers:', {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          });
+          console.log('Body:', JSON.stringify(requestBody, null, 2));
+          
           const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             },
-            body: JSON.stringify({
-              url: settings.youtubeUrl,
-              videoQuality: "720",
-              audioFormat: "mp3",
-              youtubeVideoCodec: "h264"
-            }),
+            body: JSON.stringify(requestBody),
             signal: controller.signal
           });
           
           clearTimeout(timeout);
           
+          console.log('📥 COBALT RESPONSE STATUS:', cobaltResponse.status);
+          console.log('Response Headers:', Object.fromEntries(cobaltResponse.headers.entries()));
+          
           const cobaltData = await cobaltResponse.json();
-          console.log('Cobalt response:', cobaltData);
+          console.log('📊 COBALT RESPONSE DATA:', JSON.stringify(cobaltData, null, 2));
           
           if (cobaltData.status === 'error') {
             const errorCode = cobaltData.error?.code || 'Unknown error';
