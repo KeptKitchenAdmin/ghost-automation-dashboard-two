@@ -81,7 +81,7 @@ const VideoGenerator = () => {
       // Step 2: 🔒 SECURE - Generate video via server-side function
       setProgress('🎬 Generating video (server processing)...');
       
-      const videoResponse = await fetch('/api/generate-video-simple', {
+      const videoResponse = await fetch('/api/generate-video-debug', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
