@@ -1,0 +1,7 @@
+# Files to exclude from security scanning
+package-lock.json
+*/package-lock.json
+frontend/package-lock.json
+*.lock
+yarn.lock
+pnpm-lock.yaml
