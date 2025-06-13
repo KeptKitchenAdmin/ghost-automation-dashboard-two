@@ -1,5 +1,5 @@
 {
-  "name": "luxury-automation-dashboard",
+  "name": "ghost-automation-dashboard-three",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "build:production": "rm -rf .next && npm run build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && npx wrangler pages deploy out --project-name=ghost-automation-dashboard-three --compatibility-date=2024-01-01",
+    "deploy": "npm run build && npx wrangler pages deploy out --project-name=ghost-automation-dashboard-three",
     "deploy:functions": "npm run build && npx wrangler pages deploy .next --project-name=ghost-automation-dashboard-three --compatibility-date=2024-01-01",
     "test:api": "node test_end_to_end_workflow.ts",
     "test:performance": "node test_performance_benchmark.ts"

@@ -19,6 +19,15 @@ export async function onRequestPost(context) {
     
     console.log(`🎬 Server: Starting video generation (${useProduction ? 'Production' : 'Sandbox'})`);
     
+    // Debug environment variables
+    console.log('🔍 Server: Environment variables check:', {
+      hasSandboxKey: !!env.SHOTSTACK_SANDBOX_API_KEY,
+      hasProductionKey: !!env.SHOTSTACK_PRODUCTION_API_KEY,
+      sandboxKeyLength: env.SHOTSTACK_SANDBOX_API_KEY?.length || 0,
+      productionKeyLength: env.SHOTSTACK_PRODUCTION_API_KEY?.length || 0,
+      useProduction
+    });
+    
     // Select correct API key based on mode
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 
@@ -26,7 +35,13 @@ export async function onRequestPost(context) {
     
     if (!apiKey) {
       const mode = useProduction ? 'Production' : 'Sandbox';
-      throw new Error(`${mode} Shotstack API key not configured`);
+      const debugInfo = {
+        mode,
+        availableKeys: Object.keys(env).filter(key => key.includes('SHOTSTACK')),
+        allEnvKeys: Object.keys(env).length
+      };
+      console.error('❌ Server: API key missing:', debugInfo);
+      throw new Error(`${mode} Shotstack API key not configured - Debug: ${JSON.stringify(debugInfo)}`);
     }
     
     // Step 1: Create voiceover with ElevenLabs (via Shotstack)
