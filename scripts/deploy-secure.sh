@@ -15,7 +15,7 @@ NC='\033[0m'
 
 # Configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CLOUDFLARE_APP_URL="https://ghost-automation-dashboard-two.wren-fc5.workers.dev"
+CLOUDFLARE_APP_URL="https://ghost-automation-dashboard-three.pages.dev"
 
 echo -e "${PURPLE}🚀 Enterprise Secure Deployment Pipeline${NC}"
 echo -e "${PURPLE}=======================================${NC}\n"

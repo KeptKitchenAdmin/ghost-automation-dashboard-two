@@ -27,7 +27,7 @@ try {
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://ghost-automation-dashboard-two.wren-fc5.workers.dev'],
+  origin: ['http://localhost:3000', 'https://ghost-automation-dashboard-three.pages.dev'],
   credentials: true
 }));
 
