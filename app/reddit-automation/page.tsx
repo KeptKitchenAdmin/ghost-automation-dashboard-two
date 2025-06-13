@@ -73,10 +73,9 @@ const VideoGenerator = () => {
             },
             body: JSON.stringify({
               url: settings.youtubeUrl,
-              vCodec: "h264",
-              vQuality: "720",
-              aFormat: "mp3",
-              isAudioOnly: false
+              videoQuality: "720",
+              audioFormat: "mp3",
+              youtubeVideoCodec: "h264"
             }),
             signal: controller.signal
           });
