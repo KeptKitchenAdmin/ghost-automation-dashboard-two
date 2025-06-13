@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Video, Download, DollarSign, Clock, AlertCircle, Play } from 'lucide-react';
-import { RedditScraperService } from '../../lib/services/reddit-scraper';
 
 const VideoGenerator = () => {
   const [settings, setSettings] = useState({
@@ -55,56 +54,71 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
-      // Step 1: Find viral Reddit story (client-side, no API keys needed)
+      // Step 1: 🔒 SECURE - Get Reddit story via server-side function
       setProgress('🔍 Finding viral Reddit story...');
-      const redditScraper = new RedditScraperService();
-      const stories = await redditScraper.scrapeRedditStories(settings.category, 5);
-      if (stories.length === 0) {
-        throw new Error('No suitable stories found in this category');
-      }
-      const selectedStory = stories[0];
-
-      // Step 2: 🔒 SECURE API CALL - Server handles all external APIs
-      setProgress('🎬 Generating video (server processing)...');
       
-      const response = await fetch('/api/reddit-automation/generate-video', {
+      const storiesResponse = await fetch('/api/reddit-stories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          story: selectedStory,
-          background_url: settings.youtubeUrl,
-          voice_settings: {
+          category: settings.category,
+          duration: settings.duration
+        })
+      });
+
+      if (!storiesResponse.ok) {
+        throw new Error(`Stories API error: ${storiesResponse.status}`);
+      }
+
+      const storiesResult = await storiesResponse.json();
+      
+      if (!storiesResult.success) {
+        throw new Error(storiesResult.error || 'No suitable stories found');
+      }
+
+      // Step 2: 🔒 SECURE - Generate video via server-side function
+      setProgress('🎬 Generating video (server processing)...');
+      
+      const videoResponse = await fetch('/api/generate-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          enhancedScript: storiesResult.enhancedScript,
+          backgroundVideoUrl: settings.youtubeUrl,
+          voiceSettings: {
             voice_id: settings.voiceId,
             stability: 0.75,
             similarity_boost: 0.85
           },
-          video_config: {
-            duration: settings.duration,
-            startTime: settings.startTime,
-            useProduction: settings.useProduction,
-            addCaptions: true
-          }
+          duration: settings.duration,
+          startTime: settings.startTime,
+          useProduction: settings.useProduction,
+          addCaptions: true
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+      if (!videoResponse.ok) {
+        throw new Error(`Video API error: ${videoResponse.status}`);
       }
 
-      const result = await response.json();
+      const videoResult = await videoResponse.json();
       
-      if (!result.success) {
-        throw new Error(result.error || 'Video generation failed');
+      if (!videoResult.success) {
+        throw new Error(videoResult.error || 'Video generation failed');
       }
 
       // Step 3: ✅ SECURE - Server processed everything safely
       setProgress('✅ Video generation complete!');
       setGeneratedVideo({
-        jobId: result.jobId,
-        story: selectedStory,
-        message: result.message
+        videoUrl: videoResult.videoUrl,
+        audioUrl: videoResult.audioUrl,
+        story: storiesResult.story,
+        costs: videoResult.costs,
+        mode: videoResult.mode
       });
 
     } catch (error) {
@@ -372,15 +386,15 @@ const VideoGenerator = () => {
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Shotstack:</span>
-                      <span className="text-white">${generatedVideo.costs.shotstack_cost.toFixed(2)}</span>
+                      <span className="text-white">${generatedVideo.costs?.shotstack_cost?.toFixed(2) || '0.00'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">ElevenLabs:</span>
-                      <span className="text-white">${generatedVideo.costs.elevenlabs_cost.toFixed(2)}</span>
+                      <span className="text-white">${generatedVideo.costs?.elevenlabs_cost?.toFixed(2) || '0.00'}</span>
                     </div>
                     <div className="flex justify-between border-t border-gray-600 pt-1">
                       <span className="text-white font-medium">Total:</span>
-                      <span className="text-white font-medium">${generatedVideo.costs.total_cost.toFixed(2)}</span>
+                      <span className="text-white font-medium">${generatedVideo.costs?.total_cost?.toFixed(2) || '0.00'}</span>
                     </div>
                   </div>
                 </div>
@@ -399,6 +413,10 @@ const VideoGenerator = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-400">Category:</span>
                       <span className="text-white capitalize">{settings.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Mode:</span>
+                      <span className="text-white capitalize">{generatedVideo.mode || 'sandbox'}</span>
                     </div>
                   </div>
                 </div>
