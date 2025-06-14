@@ -93,8 +93,14 @@ const VideoGenerator = () => {
   const calculateStoryDuration = (story) => {
     if (!story) return 0;
     const wordCount = story.content.split(' ').length;
-    const wordsPerMinuteAt1_3x = (150 * 1.3); // 195 WPM at 1.3x speed
-    const durationMinutes = wordCount / wordsPerMinuteAt1_3x;
+    
+    // Normal reading speed: 150 WPM
+    // At 1.3x speed: 150 / 1.3 = ~115 WPM (slower because we're speeding up AFTER recording)
+    const wordsPerMinute = 115; 
+    const durationMinutes = wordCount / wordsPerMinute;
+    
+    console.log(`Story calculation: ${wordCount} words ÷ ${wordsPerMinute} WPM = ${durationMinutes.toFixed(1)} minutes`);
+    
     return Math.ceil(durationMinutes * 60); // Convert to seconds
   };
 
@@ -594,7 +600,7 @@ const VideoGenerator = () => {
                       <span>🔥 {Math.round(story.viral_score)}</span>
                     </div>
                     <span className="font-medium">
-                      {Math.round(story.content.split(' ').length / (150 * 1.3))} min @ 1.3x speed
+                      {Math.round(story.content.split(' ').length / 115)} min @ 1.3x speed
                     </span>
                   </div>
                 </div>

@@ -131,12 +131,12 @@ async function scrapeRedditStories(category, limit = 5) {
       for (const post of posts) {
         const postData = post.data;
         
-        // Filter quality content
+        // Filter for longer, quality content suitable for 5-15 minute videos
         if (
           postData.upvote_ratio < 0.8 ||
           postData.ups < 500 ||
-          postData.selftext.length < 200 ||
-          postData.selftext.length > 3000 ||
+          postData.selftext.length < 800 || // Minimum 800 chars for ~5 min video
+          postData.selftext.length > 8000 || // Maximum 8000 chars for ~15 min video  
           postData.over_18 ||
           postData.stickied ||
           containsProblematicContent(postData.selftext)
@@ -174,7 +174,7 @@ async function scrapeRedditStories(category, limit = 5) {
     return [{
       id: "fallback_001",
       title: "When Everything Goes Wrong (Reddit Story)",
-      content: "So this happened to me last week and I'm still processing it. I was having what I thought was a normal day when suddenly everything started going sideways. The details are crazy but basically, I ended up in a situation I never could have imagined. People are saying I handled it well, but honestly, I'm not so sure. What would you have done in my situation?",
+      content: "So this happened to me last week and I'm still processing it. I was having what I thought was a normal day when suddenly everything started going sideways. The details are absolutely insane and I need to share this story because I genuinely don't know if I handled it right. It all started when I woke up that Tuesday morning. I had planned to have a productive day - you know, tackle some work projects, maybe clean the house a bit, normal stuff. But from the moment I stepped out of bed, things just felt off. First, my coffee maker decided to completely break down. Not just malfunction - I'm talking full electrical failure with sparks and everything. I should have taken that as a sign. Then my car wouldn't start. The battery was completely dead even though it was fine the night before. I called my neighbor to jump it, but even that didn't work. Something was clearly wrong with the alternator. So there I was, stranded at home with no coffee and no transportation. I decided to work from home instead, but then my internet went out. Not just slow - completely down. I called the provider and they said there was no outage in my area. Just my house, apparently. At this point I'm starting to think the universe is conspiring against me. But it gets worse. Around noon, I hear this commotion outside. I look out my window and there's this massive tree that had fallen across the street, completely blocking traffic. It hadn't even been windy that morning. The tree just... fell. And of course, it took out power lines with it, which explained my internet issues. But here's where it gets really crazy. As I'm standing there looking at this tree, my phone rings. It's my boss, and she's furious. Apparently, some important emails I thought I'd sent yesterday never actually went through. The client is threatening to cancel our biggest contract. She needs me in the office immediately to fix this mess. I try to explain about my car, the tree, everything that's going wrong, but she just thinks I'm making excuses. So I start walking. It's about three miles to the office, and I figure the exercise might clear my head anyway. But halfway there, it starts pouring rain. Not just a light drizzle - I'm talking biblical proportions. I take shelter under this bus stop, and that's when I notice there's this guy there who's clearly having an even worse day than me. He's soaked, his briefcase is broken, papers scattered everywhere, and he's just sitting there looking defeated. We start talking, and it turns out he's dealing with his own series of impossible coincidences. His story is even crazier than mine. Long story short, we end up helping each other out, I make it to the office, save the client relationship, and somehow everything works out. But the whole experience really made me think about how we handle adversity and whether these kinds of days happen to test us or if it's all just random chaos. What would you have done in my situation?",
       subreddit: primarySubreddits[category] || 'AmItheAsshole',
       upvotes: 2500,
       comments: 340,
@@ -182,7 +182,7 @@ async function scrapeRedditStories(category, limit = 5) {
       url: "https://reddit.com/fallback",
       viral_score: 75,
       category,
-      estimated_duration: 180
+      estimated_duration: 600
     }];
   }
   
