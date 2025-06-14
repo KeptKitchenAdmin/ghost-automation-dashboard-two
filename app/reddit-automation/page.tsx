@@ -5,11 +5,12 @@ import { Video, Download, DollarSign, Clock, AlertCircle, Play } from 'lucide-re
 
 const VideoGenerator = () => {
   const [settings, setSettings] = useState({
-    youtubeUrl: '',
+    uploadedVideo: null,
     category: 'drama',
     duration: 300, // 5 minutes default
     voiceId: 'Adam',
-    startTime: 0, // Start time in seconds for YouTube video trimming
+    startTime: 0, // Start time in seconds for video trimming
+    trimDuration: 300, // Duration to use from video (5 minutes default)
     useProduction: false // Toggle between sandbox and production APIs
   });
   
@@ -17,6 +18,8 @@ const VideoGenerator = () => {
   const [progress, setProgress] = useState('');
   const [generatedVideo, setGeneratedVideo] = useState(null);
   const [error, setError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const categories = [
     { id: 'drama', name: 'Drama', description: 'Relationship conflicts and life drama' },
@@ -33,6 +36,50 @@ const VideoGenerator = () => {
     { id: 'Dorothy', name: 'Dorothy - Mature Female' }
   ];
 
+  // Handle video file upload - client-side for direct Shotstack integration
+  const handleVideoUpload = async (file) => {
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    setError('');
+    
+    try {
+      // Convert file to base64 for Shotstack API
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64Data = event.target.result;
+        
+        setSettings(prev => ({
+          ...prev,
+          uploadedVideo: {
+            file: file,
+            base64: base64Data,
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }
+        }));
+        
+        setUploadProgress(100);
+      };
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
+          setUploadProgress(progress);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+      
+    } catch (error) {
+      console.error('File processing error:', error);
+      setError(`File processing failed: ${error.message}`);
+      setIsUploading(false);
+    }
+  };
+
   // Calculate estimated costs
   const estimatedCost = () => {
     const durationMinutes = settings.duration / 60;
@@ -44,8 +91,8 @@ const VideoGenerator = () => {
 
   // 🔒 SECURE SERVER-SIDE API CALL - NO EXPOSED KEYS
   const generateVideo = async () => {
-    if (!settings.youtubeUrl.trim()) {
-      setError('Please enter a YouTube URL');
+    if (!settings.uploadedVideo) {
+      setError('Please upload a video file');
       return;
     }
 
@@ -54,45 +101,8 @@ const VideoGenerator = () => {
     setGeneratedVideo(null);
     
     try {
-      // Step 1: Convert YouTube URL to direct MP4 if needed
-      let processedVideoUrl = settings.youtubeUrl;
-      
-      if (settings.youtubeUrl.includes('youtube.com') || settings.youtubeUrl.includes('youtu.be')) {
-        setProgress('🔄 Converting YouTube URL to direct MP4...');
-        
-        try {
-          const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              url: settings.youtubeUrl,
-              videoQuality: "720",
-              audioFormat: "mp3",
-              youtubeVideoCodec: "h264"
-            })
-          });
-          
-          const cobaltData = await cobaltResponse.json();
-          console.log('Cobalt response:', cobaltData);
-          
-          if (cobaltData.url) {
-            processedVideoUrl = cobaltData.url;
-            setProgress('✅ YouTube URL converted successfully!');
-          } else if (cobaltData.status === 'error') {
-            const errorCode = cobaltData.error?.code || 'Unknown error';
-            console.error('Cobalt error:', errorCode);
-            setError(`Cobalt cannot convert this YouTube video: ${errorCode}. Your Cobalt instance needs additional configuration to bypass YouTube blocks.`);
-            return;
-          }
-        } catch (cobaltError) {
-          console.error('Cobalt API error:', cobaltError);
-          setError('Failed to connect to Cobalt instance. Check if it\'s still running.');
-          return;
-        }
-      }
+      // Step 1: Prepare uploaded video data for Shotstack
+      setProgress('📹 Preparing uploaded video for processing...');
       
       // Step 2: 🔒 SECURE - Get Reddit story via server-side function
       setProgress('🔍 Finding viral Reddit story...');
@@ -128,7 +138,11 @@ const VideoGenerator = () => {
         },
         body: JSON.stringify({
           enhancedScript: storiesResult.enhancedScript,
-          backgroundVideoUrl: processedVideoUrl, // Use the converted URL
+          uploadedVideo: {
+            base64: settings.uploadedVideo.base64,
+            filename: settings.uploadedVideo.name,
+            type: settings.uploadedVideo.type
+          },
           voiceSettings: {
             voice_id: settings.voiceId,
             stability: 0.75,
@@ -136,6 +150,7 @@ const VideoGenerator = () => {
           },
           duration: settings.duration,
           startTime: settings.startTime,
+          trimDuration: settings.trimDuration,
           useProduction: settings.useProduction,
           addCaptions: true
         })
@@ -230,46 +245,86 @@ const VideoGenerator = () => {
           <h2 className="text-xl font-semibold text-white mb-6">Video Settings</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* YouTube URL */}
+            {/* Video Upload */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Background Video URL
+                Background Video Upload
               </label>
+              
+              {!settings.uploadedVideo ? (
+                <div 
+                  className="w-full p-8 border-2 border-dashed border-gray-600 rounded-lg bg-gray-700/50 hover:bg-gray-700/70 transition-colors cursor-pointer"
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('video/')) {
+                      handleVideoUpload(file);
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => document.getElementById('video-upload').click()}
+                >
+                  <div className="text-center">
+                    <Video size={48} className="mx-auto mb-4 text-gray-400" />
+                    <p className="text-white font-medium mb-2">Drop video file here or click to browse</p>
+                    <p className="text-sm text-gray-400 mb-4">Supports: MP4, MOV, AVI, WebM (Max 100MB)</p>
+                    {isUploading && (
+                      <div className="mt-4">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          <span className="text-sm text-blue-400">Uploading... {uploadProgress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-600 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Video size={24} className="text-green-400" />
+                      <div>
+                        <p className="text-white font-medium">{settings.uploadedVideo.name}</p>
+                        <p className="text-sm text-gray-400">
+                          {(settings.uploadedVideo.size / (1024 * 1024)).toFixed(1)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSettings(prev => ({ ...prev, uploadedVideo: null }))}
+                      className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700 rounded text-white transition-colors"
+                      disabled={isGenerating}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <input
-                type="url"
-                value={settings.youtubeUrl}
-                onChange={(e) => setSettings(prev => ({ ...prev, youtubeUrl: e.target.value }))}
-                placeholder="https://youtube.com/watch?v=... or https://example.com/video.mp4"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                disabled={isGenerating}
+                id="video-upload"
+                type="file"
+                accept="video/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) handleVideoUpload(file);
+                }}
+                className="hidden"
+                disabled={isGenerating || isUploading}
               />
+              
               <div className="mt-2 space-y-1">
                 <p className="text-xs text-green-400">
-                  ✅ YouTube URLs supported via personal Cobalt instance
-                </p>
-                <p className="text-xs text-gray-500">
-                  Examples: 
-                  <button 
-                    onClick={() => setSettings(prev => ({ ...prev, youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' }))}
-                    className="ml-1 text-blue-400 hover:text-blue-300 underline"
-                    disabled={isGenerating}
-                  >
-                    YouTube
-                  </button>
-                  {' | '}
-                  <button 
-                    onClick={() => setSettings(prev => ({ ...prev, youtubeUrl: 'https://shotstack-assets.s3-ap-southeast-2.amazonaws.com/footage/beach-overhead.mp4' }))}
-                    className="ml-1 text-blue-400 hover:text-blue-300 underline"
-                    disabled={isGenerating}
-                  >
-                    Direct MP4
-                  </button>
+                  ✅ Direct video upload - no third-party dependencies
                 </p>
                 <p className="text-xs text-gray-400">
-                  Workflow: YouTube → Cobalt (your instance) → Direct MP4 → Shotstack → Final Video
-                </p>
-                <p className="text-xs text-yellow-400">
-                  🔧 Cobalt instance: cobalt-latest-qymt.onrender.com
+                  Workflow: Upload Video → Set Time Range → Generate Content → Final Video
                 </p>
               </div>
             </div>
@@ -317,7 +372,7 @@ const VideoGenerator = () => {
                 value={settings.startTime}
                 onChange={(e) => setSettings(prev => ({ ...prev, startTime: parseInt(e.target.value) }))}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                disabled={isGenerating}
+                disabled={isGenerating || !settings.uploadedVideo}
               >
                 <option value={0}>Start from beginning</option>
                 <option value={60}>1 minute in</option>
@@ -328,19 +383,19 @@ const VideoGenerator = () => {
                 <option value={1200}>20 minutes in</option>
                 <option value={1800}>30 minutes in</option>
               </select>
-              <p className="mt-1 text-xs text-gray-500">Skip intro/ads by starting later in the video</p>
+              <p className="mt-1 text-xs text-gray-500">Choose where to start using your uploaded video</p>
             </div>
 
-            {/* Duration */}
+            {/* Trim Duration */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Video Duration (minutes)
+                Use Duration (how much video to use)
               </label>
               <select
-                value={settings.duration}
-                onChange={(e) => setSettings(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                value={settings.trimDuration}
+                onChange={(e) => setSettings(prev => ({ ...prev, trimDuration: parseInt(e.target.value), duration: parseInt(e.target.value) }))}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                disabled={isGenerating}
+                disabled={isGenerating || !settings.uploadedVideo}
               >
                 <option value={60}>1 minute ($0.40)</option>
                 <option value={180}>3 minutes ($1.20)</option>
@@ -349,6 +404,7 @@ const VideoGenerator = () => {
                 <option value={600}>10 minutes ($4.00)</option>
                 <option value={900}>15 minutes ($6.00)</option>
               </select>
+              <p className="mt-1 text-xs text-gray-500">Amount of video to use starting from your chosen start time</p>
             </div>
 
             {/* API Mode Toggle */}
@@ -405,7 +461,7 @@ const VideoGenerator = () => {
           <div className="mt-8">
             <button
               onClick={generateVideo}
-              disabled={isGenerating || !settings.youtubeUrl.trim()}
+              disabled={isGenerating || !settings.uploadedVideo}
               className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               {isGenerating ? (
