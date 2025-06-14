@@ -10,19 +10,30 @@ export async function onRequestPost(context) {
     const {
       enhancedScript,
       backgroundVideoUrl,
+      uploadedVideo,
       voiceSettings,
       duration,
       startTime,
+      trimDuration,
       useProduction = false,
       addCaptions = true
     } = await request.json();
     
     console.log(`🎬 Server: Starting ASYNC Shotstack process`);
-    console.log(`📹 Input URL: ${backgroundVideoUrl}`);
     
-    // Frontend should have already converted YouTube URLs
-    // We'll use the URL as-is since cobalt conversion happens client-side
-    let actualVideoUrl = backgroundVideoUrl;
+    // Handle uploaded video file or URL
+    let actualVideoUrl;
+    if (uploadedVideo) {
+      console.log(`📹 Processing uploaded video: ${uploadedVideo.filename}`);
+      // For uploaded videos, we need to process the base64 data
+      // Shotstack can accept base64 data directly in some cases, or we need to convert it
+      actualVideoUrl = uploadedVideo.base64;
+    } else if (backgroundVideoUrl) {
+      console.log(`📹 Input URL: ${backgroundVideoUrl}`);
+      actualVideoUrl = backgroundVideoUrl;
+    } else {
+      throw new Error('No video source provided - need either uploadedVideo or backgroundVideoUrl');
+    }
     
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 
@@ -38,10 +49,24 @@ export async function onRequestPost(context) {
     }
     
     // STEP 1: START INGEST (NON-BLOCKING)
-    console.log('📥 Starting YouTube ingest...');
+    console.log('📥 Starting video ingest...');
     const ingestUrl = useProduction 
       ? 'https://api.shotstack.io/ingest/v1/sources'
       : 'https://api.shotstack.io/ingest/stage/sources';
+    
+    let ingestBody;
+    if (uploadedVideo) {
+      // For uploaded videos, use Shotstack's upload endpoint
+      console.log('📤 Uploading video file to Shotstack...');
+      ingestBody = {
+        url: actualVideoUrl // Base64 data URL
+      };
+    } else {
+      // For URL-based videos
+      ingestBody = {
+        url: actualVideoUrl
+      };
+    }
     
     const ingestResponse = await fetch(ingestUrl, {
       method: 'POST',
@@ -50,9 +75,7 @@ export async function onRequestPost(context) {
         'x-api-key': apiKey,
         'x-shotstack-owner': ownerId
       },
-      body: JSON.stringify({
-        url: actualVideoUrl
-      })
+      body: JSON.stringify(ingestBody)
     });
     
     console.log(`📥 Ingest response: ${ingestResponse.status} ${ingestResponse.statusText}`);
@@ -81,9 +104,12 @@ export async function onRequestPost(context) {
       estimated_time: "5-10 minutes",
       status_check_url: `/api/shotstack-status?id=${ingestData.data.id}`,
       debug: {
-        youtube_url: backgroundVideoUrl,
+        video_source: uploadedVideo ? 'uploaded_file' : 'url',
+        video_url: backgroundVideoUrl,
+        uploaded_filename: uploadedVideo?.filename,
         start_time: startTime,
         duration: duration,
+        trim_duration: trimDuration,
         mode: useProduction ? 'production' : 'sandbox'
       }
     }), {
