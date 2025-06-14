@@ -76,17 +76,20 @@ export async function onRequestPost(context) {
 
 // Reddit scraping logic (server-side)
 async function scrapeRedditStories(category, limit = 5, refresh = false) {
-  // START WITH SINGLE SUBREDDIT - most reliable for each category
-  const primarySubreddits = {
-    drama: 'AmItheAsshole',
-    horror: 'nosleep', 
-    revenge: 'MaliciousCompliance',
-    wholesome: 'MadeMeSmile',
-    mystery: 'UnresolvedMysteries'
+  // Use multiple subreddits for more variety, especially on refresh
+  const subredditsByCategory = {
+    drama: ['AmItheAsshole', 'relationships', 'relationship_advice', 'TrueOffMyChest'],
+    horror: ['nosleep', 'LetsNotMeet', 'creepy', 'paranormal'], 
+    revenge: ['MaliciousCompliance', 'pettyrevenge', 'ProRevenge', 'NuclearRevenge'],
+    wholesome: ['MadeMeSmile', 'wholesome', 'humansbeingbros', 'UpliftingNews'],
+    mystery: ['UnresolvedMysteries', 'mystery', 'RBI', 'Glitch_in_the_Matrix']
   };
   
-  // Use only primary subreddit to avoid multiple requests
-  const targetSubreddit = primarySubreddits[category] || 'AmItheAsshole';
+  const availableSubreddits = subredditsByCategory[category] || ['AmItheAsshole'];
+  const targetSubreddit = refresh ? 
+    availableSubreddits[Math.floor(Math.random() * availableSubreddits.length)] :
+    availableSubreddits[0];
+    
   const stories = [];
   
   console.log(`🔍 Fetching from single subreddit: r/${targetSubreddit} (refresh: ${refresh})`);
@@ -181,7 +184,7 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
   
   // If no stories found (Reddit blocking), return fallback
   if (stories.length === 0) {
-    console.warn('No Reddit stories found, using fallback story');
+    console.warn(`❌ No Reddit stories found from r/${targetSubreddit}, using fallback story`);
     return [{
       id: "fallback_001",
       title: "When Everything Goes Wrong (Reddit Story)",

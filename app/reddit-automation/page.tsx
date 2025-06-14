@@ -112,15 +112,18 @@ const VideoGenerator = () => {
     setAvailableStories([]);
     
     try {
-      const response = await fetch('/api/reddit-stories', {
+      const response = await fetch(`/api/reddit-stories?nocache=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         },
         body: JSON.stringify({
           category: category,
-          limit: 10, // Get more stories to choose from
-          refresh: Date.now() // Add timestamp to prevent caching
+          limit: 10,
+          refresh: Date.now(),
+          random: Math.random() // Extra randomization
         })
       });
 
