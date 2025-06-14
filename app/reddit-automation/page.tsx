@@ -146,11 +146,9 @@ const VideoGenerator = () => {
 
       setAvailableStories(storiesWithDuration);
       
-      // Auto-select first story
-      if (storiesWithDuration.length > 0) {
-        setSelectedStory(storiesWithDuration[0]);
-        setCalculatedDuration(storiesWithDuration[0].calculatedDuration);
-      }
+      // DON'T auto-select story - let user choose manually
+      console.log(`✅ Loaded ${storiesWithDuration.length} fresh stories:`, 
+        storiesWithDuration.map(s => `${s.title} (${s.content.split(' ').length} words)`));
       
     } catch (error) {
       console.error('Failed to fetch stories:', error);

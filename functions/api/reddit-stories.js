@@ -136,6 +136,7 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
       const posts = data.data.children;
       
       console.log(`✅ Successfully fetched ${posts.length} posts from r/${targetSubreddit}`);
+      console.log(`📋 Post titles preview:`, posts.slice(0, 3).map(p => p.data.title));
       
       for (const post of posts) {
         const postData = post.data;
@@ -171,6 +172,7 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
       }
       
       console.log(`📊 Found ${stories.length} quality stories from r/${targetSubreddit}`);
+      console.log(`🎯 Story word counts:`, stories.map(s => `${s.title.substring(0, 30)}... (${s.content.split(' ').length} words)`));
     }
   } catch (error) {
     console.error(`❌ Error scraping r/${targetSubreddit}:`, error.message);
