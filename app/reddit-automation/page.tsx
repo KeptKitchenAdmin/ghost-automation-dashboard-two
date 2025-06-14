@@ -106,6 +106,11 @@ const VideoGenerator = () => {
     setIsLoadingStories(true);
     setError('');
     
+    // Clear current selection to force fresh selection
+    setSelectedStory(null);
+    setCalculatedDuration(0);
+    setAvailableStories([]);
+    
     try {
       const response = await fetch('/api/reddit-stories', {
         method: 'POST',
@@ -114,7 +119,8 @@ const VideoGenerator = () => {
         },
         body: JSON.stringify({
           category: category,
-          limit: 5 // Get 5 stories to choose from
+          limit: 10, // Get more stories to choose from
+          refresh: Date.now() // Add timestamp to prevent caching
         })
       });
 

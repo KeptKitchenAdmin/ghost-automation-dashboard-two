@@ -7,12 +7,13 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
-    const { category, duration } = await request.json();
+    const { category, duration, limit = 5, refresh } = await request.json();
     
     console.log(`🔍 Server: Finding Reddit stories for category: ${category}`);
     
     // Step 1: Scrape Reddit stories (server-side for better reliability)
-    const stories = await scrapeRedditStories(category, 5);
+    console.log(`🔄 Refresh request: ${refresh ? 'YES' : 'NO'}, fetching ${limit} stories`);
+    const stories = await scrapeRedditStories(category, limit, refresh);
     if (stories.length === 0) {
       return new Response(JSON.stringify({
         success: false,
@@ -44,7 +45,8 @@ export async function onRequestPost(context) {
     
     return new Response(JSON.stringify({
       success: true,
-      story: selectedStory,
+      stories: stories, // Return all stories for selection
+      story: selectedStory, // Keep backwards compatibility
       enhancedScript: enhancedScript
     }), {
       headers: { 'Content-Type': 'application/json' }
@@ -73,7 +75,7 @@ export async function onRequestPost(context) {
 }
 
 // Reddit scraping logic (server-side)
-async function scrapeRedditStories(category, limit = 5) {
+async function scrapeRedditStories(category, limit = 5, refresh = false) {
   // START WITH SINGLE SUBREDDIT - most reliable for each category
   const primarySubreddits = {
     drama: 'AmItheAsshole',
@@ -87,12 +89,19 @@ async function scrapeRedditStories(category, limit = 5) {
   const targetSubreddit = primarySubreddits[category] || 'AmItheAsshole';
   const stories = [];
   
-  console.log(`🔍 Fetching from single subreddit: r/${targetSubreddit}`);
+  console.log(`🔍 Fetching from single subreddit: r/${targetSubreddit} (refresh: ${refresh})`);
   
   try {
+    // Use different Reddit sorting to get fresh content on refresh
+    const sortTypes = ['hot', 'top', 'rising'];
+    const sortType = refresh ? sortTypes[Math.floor(Math.random() * sortTypes.length)] : 'hot';
+    const timeFilter = (sortType === 'top') ? '&t=week' : '';
+    
+    console.log(`📊 Using sort: ${sortType}${timeFilter}`);
+    
     // SINGLE SUBREDDIT REQUEST with enhanced anti-bot measures
     const response = await fetch(
-      `https://www.reddit.com/r/${targetSubreddit}/hot.json?limit=${limit}`,
+      `https://www.reddit.com/r/${targetSubreddit}/${sortType}.json?limit=${Math.min(limit * 3, 50)}${timeFilter}`,
       {
         headers: {
           // ENHANCED USER-AGENT - Latest Chrome with realistic version
@@ -186,9 +195,20 @@ async function scrapeRedditStories(category, limit = 5) {
     }];
   }
   
-  return stories
-    .sort((a, b) => b.viral_score - a.viral_score)
-    .slice(0, limit);
+  // Sort and randomize results for fresh content
+  const sortedStories = stories.sort((a, b) => b.viral_score - a.viral_score);
+  
+  if (refresh && sortedStories.length > limit) {
+    // On refresh, randomize selection from top stories
+    const shuffled = sortedStories.slice(0, Math.min(limit * 2, sortedStories.length));
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, limit);
+  }
+  
+  return sortedStories.slice(0, limit);
 }
 
 // Claude API integration (server-side with secure API key)
