@@ -3,11 +3,32 @@
  * Environment Variables: ANTHROPIC_API_KEY (server-side only)
  */
 
+export async function onRequestGet(context) {
+  return new Response(JSON.stringify({
+    success: true,
+    message: "Reddit Stories API is working",
+    timestamp: new Date().toISOString(),
+    available_endpoints: ["POST /api/reddit-stories"]
+  }), {
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
-    const { category, duration, limit = 5, refresh } = await request.json();
+    console.log('🔍 Reddit Stories API called');
+    console.log('Request URL:', request.url);
+    console.log('Request method:', request.method);
+    
+    const requestBody = await request.json();
+    console.log('Request body:', requestBody);
+    
+    const { category, duration, limit = 5, refresh } = requestBody;
     
     console.log(`🔍 Server: Finding Reddit stories for category: ${category}`);
     
