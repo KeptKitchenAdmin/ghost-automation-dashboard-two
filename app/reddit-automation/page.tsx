@@ -40,10 +40,7 @@ const VideoGenerator = () => {
     { id: 'Dorothy', name: 'Dorothy - Mature Female' }
   ];
 
-  // Auto-load stories on page load
-  useEffect(() => {
-    fetchStories(settings.category);
-  }, []);
+  // Stories will load when user selects category or clicks refresh
 
   // Handle video file upload - client-side for direct Shotstack integration
   const handleVideoUpload = async (file) => {
@@ -159,6 +156,7 @@ const VideoGenerator = () => {
 
   // Calculate estimated costs
   const estimatedCost = () => {
+    if (!selectedStory || calculatedDuration === 0) return 0;
     const durationMinutes = calculatedDuration / 60;
     const shotstackCost = durationMinutes * 0.40;
     const claudeCost = Math.min(0.50, durationMinutes * 0.03);
@@ -466,15 +464,15 @@ const VideoGenerator = () => {
               </label>
               <div className="px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-blue-400" />
-                  <span className="text-white font-medium">
-                    {selectedStory ? 
+                  <Clock size={16} className="text-gray-400" />
+                  <span className="text-gray-400 font-medium">
+                    {selectedStory && calculatedDuration > 0 ? 
                       `${Math.floor(calculatedDuration / 60)}:${(calculatedDuration % 60).toString().padStart(2, '0')}` 
-                      : 'Select a story first'
+                      : 'Select a story below to calculate duration'
                     }
                   </span>
                 </div>
-                {selectedStory && (
+                {selectedStory && calculatedDuration > 0 && (
                   <p className="text-xs text-gray-400 mt-1">
                     Based on {selectedStory.content.split(' ').length} words at 1.3x voiceover speed
                   </p>
@@ -525,7 +523,10 @@ const VideoGenerator = () => {
                 <div className="flex items-center gap-2">
                   <DollarSign size={16} className="text-green-400" />
                   <span className="text-white font-medium">
-                    {settings.useProduction ? `$${estimatedCost().toFixed(2)}` : '$0.00 (Sandbox)'}
+                    {selectedStory && calculatedDuration > 0 ? 
+                      (settings.useProduction ? `$${estimatedCost().toFixed(2)}` : '$0.00 (Sandbox)')
+                      : 'Select story to see cost'
+                    }
                   </span>
                 </div>
               </div>
