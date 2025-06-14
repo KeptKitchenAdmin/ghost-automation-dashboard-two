@@ -61,76 +61,97 @@ const VideoGenerator = () => {
         setProgress('🔄 Converting YouTube URL to direct MP4...');
         
         try {
-          // Add timeout to handle Render free tier sleeping
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+          // Try multiple YouTube extraction methods
+          setProgress('🔄 Trying YouTube extraction methods...');
           
-          // Log exact request being sent
-          const requestBody = {
-            url: settings.youtubeUrl,
-            videoQuality: "720",
-            audioFormat: "mp3",
-            youtubeVideoCodec: "h264"
-          };
-          
-          console.log('🚀 COBALT API REQUEST:');
-          console.log('Endpoint:', 'https://cobalt-latest-qymt.onrender.com/');
-          console.log('Method:', 'POST');
-          console.log('Headers:', {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          });
-          console.log('Body:', JSON.stringify(requestBody, null, 2));
-          
-          const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              // Add authorization if your instance requires it
-              // 'Authorization': 'Bearer your-jwt-token'
-            },
-            body: JSON.stringify(requestBody),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeout);
-          
-          console.log('📥 COBALT RESPONSE STATUS:', cobaltResponse.status);
-          console.log('Response Headers:', Object.fromEntries(cobaltResponse.headers.entries()));
-          
-          const cobaltData = await cobaltResponse.json();
-          console.log('📊 COBALT RESPONSE DATA:', JSON.stringify(cobaltData, null, 2));
-          
-          if (cobaltData.status === 'error') {
-            const errorCode = cobaltData.error?.code || 'Unknown error';
-            console.warn('Cobalt extraction failed:', errorCode);
+          // Method 1: Try Cobalt first
+          try {
+            const cobaltResponse = await fetch('https://cobalt-latest-qymt.onrender.com/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                url: settings.youtubeUrl,
+                videoQuality: "720",
+                audioFormat: "mp3",
+                youtubeVideoCodec: "h264"
+              })
+            });
             
-            if (errorCode === 'error.api.youtube.login') {
-              setProgress('⚠️ This YouTube video requires login or is restricted. Trying original URL...');
-              // Let backend handle it with its own methods
+            const cobaltData = await cobaltResponse.json();
+            
+            if (cobaltData.url) {
+              processedVideoUrl = cobaltData.url;
+              setProgress('✅ YouTube URL converted via Cobalt!');
             } else {
-              setError(`Cobalt error: ${errorCode}`);
-              return; // Stop if it's a real error
+              throw new Error('Cobalt failed: ' + (cobaltData.error?.code || 'Unknown'));
             }
-          } else if (cobaltData.url) {
-            processedVideoUrl = cobaltData.url;
-            console.log('Direct MP4 URL from Cobalt:', processedVideoUrl);
-            setProgress('✅ YouTube URL converted successfully!');
-          } else if (cobaltData.status === 'stream' || cobaltData.status === 'redirect') {
-            // Handle stream/redirect response format
-            processedVideoUrl = cobaltData.url;
-            console.log('Stream URL from Cobalt:', processedVideoUrl);
-            setProgress('✅ YouTube URL converted successfully!');
+          } catch (cobaltError) {
+            console.warn('Cobalt failed:', cobaltError.message);
+            
+            // Method 2: Try alternative YouTube API
+            try {
+              setProgress('🔄 Trying alternative YouTube downloader...');
+              
+              const ytResponse = await fetch(`https://youtube-mp36.p.rapidapi.com/dl?id=${extractVideoId(settings.youtubeUrl)}`, {
+                method: 'GET',
+                headers: {
+                  'X-RapidAPI-Key': 'demo-key', // Free tier
+                  'X-RapidAPI-Host': 'youtube-mp36.p.rapidapi.com'
+                }
+              });
+              
+              const ytData = await ytResponse.json();
+              
+              if (ytData.link) {
+                processedVideoUrl = ytData.link;
+                setProgress('✅ YouTube URL converted via alternative API!');
+              } else {
+                throw new Error('Alternative API failed');
+              }
+            } catch (altError) {
+              console.warn('Alternative API failed:', altError.message);
+              
+              // Method 3: Use a working public API
+              try {
+                setProgress('🔄 Trying public YouTube converter...');
+                
+                const publicResponse = await fetch('https://yt-api.p.rapidapi.com/dl', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-RapidAPI-Key': 'demo-key'
+                  },
+                  body: JSON.stringify({ url: settings.youtubeUrl })
+                });
+                
+                const publicData = await publicResponse.json();
+                
+                if (publicData.formats && publicData.formats.length > 0) {
+                  // Find MP4 format
+                  const mp4Format = publicData.formats.find(f => f.ext === 'mp4');
+                  if (mp4Format) {
+                    processedVideoUrl = mp4Format.url;
+                    setProgress('✅ YouTube URL converted via public API!');
+                  } else {
+                    throw new Error('No MP4 format found');
+                  }
+                } else {
+                  throw new Error('Public API failed');
+                }
+              } catch (publicError) {
+                console.warn('All YouTube converters failed');
+                setError('Unable to convert YouTube URL. YouTube is blocking all conversion methods. Please use a direct MP4 URL instead.');
+                return;
+              }
+            }
           }
-        } catch (cobaltError) {
-          console.error('Cobalt API error:', cobaltError);
-          setProgress('⚠️ Cobalt conversion failed, using original URL');
-          // For now, don't send YouTube URLs to backend since it expects direct URLs
-          if (cobaltError.name === 'AbortError') {
-            setError('Cobalt instance may be sleeping (Render free tier). Please try again in 30 seconds.');
-            return;
-          }
+        } catch (extractionError) {
+          console.error('YouTube extraction failed:', extractionError);
+          setError('YouTube conversion failed. Please try a direct MP4 URL instead.');
+          return;
         }
       }
       
@@ -233,6 +254,20 @@ const VideoGenerator = () => {
       link.download = `reddit-video-${Date.now()}.mp4`;
       link.click();
     }
+  };
+
+  // Helper function to extract YouTube video ID
+  const extractVideoId = (url) => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /youtube\.com\/v\/([^&\n?#]+)/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   };
 
   return (
