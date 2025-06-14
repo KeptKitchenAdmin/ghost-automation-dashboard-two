@@ -86,7 +86,9 @@ const VideoGenerator = () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              // Add authorization if your instance requires it
+              // 'Authorization': 'Bearer your-jwt-token'
             },
             body: JSON.stringify(requestBody),
             signal: controller.signal
