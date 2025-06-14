@@ -55,10 +55,19 @@ export async function onRequestPost(context) {
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to process Reddit stories'
+      error: error.message || 'Failed to process Reddit stories',
+      stack: error.stack,
+      debug: {
+        category,
+        duration,
+        has_anthropic_key: !!env.ANTHROPIC_API_KEY
+      }
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 }
