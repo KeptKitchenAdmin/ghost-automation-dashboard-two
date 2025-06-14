@@ -166,7 +166,7 @@ async function scrapeRedditStories(category, limit = 5) {
       id: "fallback_001",
       title: "When Everything Goes Wrong (Reddit Story)",
       content: "So this happened to me last week and I'm still processing it. I was having what I thought was a normal day when suddenly everything started going sideways. The details are crazy but basically, I ended up in a situation I never could have imagined. People are saying I handled it well, but honestly, I'm not so sure. What would you have done in my situation?",
-      subreddit: category === 'drama' ? 'AmItheAsshole' : subreddits[0],
+      subreddit: primarySubreddits[category] || 'AmItheAsshole',
       upvotes: 2500,
       comments: 340,
       created_utc: Date.now() / 1000,
