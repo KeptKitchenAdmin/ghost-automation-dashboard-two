@@ -134,8 +134,9 @@ export async function onRequestPost(context) {
       }
     });
     
+    let statusData = null;
     if (statusResponse.ok) {
-      const statusData = await statusResponse.json();
+      statusData = await statusResponse.json();
       console.log('📊 Source status:', JSON.stringify(statusData, null, 2));
       
       // Check if status indicates it's still processing
@@ -242,9 +243,43 @@ export async function onRequestPost(context) {
     
     console.log(`✅ Render started with ID: ${renderId}`);
     
+    // TEMPORARY DEBUG MODE - Return all info for debugging
     return new Response(JSON.stringify({
-      success: true,
-      message: "Video generation started successfully!",
+      success: false, // Set to false to prevent frontend from processing
+      message: "DEBUG MODE - Inspecting upload and timeline structure",
+      debug: {
+        // Upload response info
+        uploadEndpointResponse: {
+          status: uploadResponse.status,
+          data: uploadData,
+          extractedSignedUrl: signedUrl,
+          extractedSourceId: sourceId
+        },
+        // PUT response info
+        putResponse: {
+          status: putResponse.status,
+          headers: Object.fromEntries(putResponse.headers)
+        },
+        // Status check info
+        statusCheckResponse: statusResponse ? {
+          status: statusResponse.status,
+          data: statusData
+        } : null,
+        // Constructed values
+        constructedSourceUrl: sourceUrl,
+        // Timeline that would be sent
+        timeline: timeline,
+        // Render body that would be sent
+        renderBody: renderBody,
+        // Original request data
+        requestData: {
+          targetDuration,
+          voiceSettings,
+          storyTitle: selectedStory?.title,
+          storyContent: selectedStory?.content?.substring(0, 200) + '...'
+        }
+      },
+      // Still include IDs for reference
       render_id: renderId,
       source_id: sourceId,
       estimated_time: "3-5 minutes",
