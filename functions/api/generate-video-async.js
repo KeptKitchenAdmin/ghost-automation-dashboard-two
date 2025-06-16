@@ -50,6 +50,7 @@ export async function onRequestPost(context) {
     
     // STEP 1: Get signed upload URL from Shotstack
     console.log('📝 Step 1: Getting signed upload URL from Shotstack...');
+    console.log(`📍 Upload endpoint: ${baseUrl}/ingest/${stage}/upload`);
     
     const uploadResponse = await fetch(`${baseUrl}/ingest/${stage}/upload`, {
       method: 'POST',
@@ -60,6 +61,9 @@ export async function onRequestPost(context) {
       body: JSON.stringify({}) // Empty body as per docs
     });
     
+    console.log('📊 Upload endpoint response status:', uploadResponse.status);
+    console.log('📊 Upload endpoint response headers:', uploadResponse.headers);
+    
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
       console.error('❌ Failed to get upload URL:', errorText);
@@ -68,6 +72,11 @@ export async function onRequestPost(context) {
     
     const uploadData = await uploadResponse.json();
     console.log('✅ Full upload response:', JSON.stringify(uploadData, null, 2));
+    console.log('🔍 Response structure:');
+    console.log('  - data:', uploadData.data);
+    console.log('  - data.attributes:', uploadData.data?.attributes);
+    console.log('  - data.id:', uploadData.data?.id);
+    console.log('  - data.type:', uploadData.data?.type);
     
     // Extract the signed URL and ID from the response
     const signedUrl = uploadData.data?.attributes?.url || uploadData.data?.url;
@@ -84,6 +93,8 @@ export async function onRequestPost(context) {
     
     // STEP 2: Upload raw video file to signed URL
     console.log('📤 Step 2: Uploading video file to signed URL...');
+    console.log(`📍 PUT URL: ${signedUrl}`);
+    console.log(`📦 File size: ${videoFile.size} bytes`);
     
     // Convert file to ArrayBuffer for upload
     const videoBuffer = await videoFile.arrayBuffer();
@@ -97,13 +108,45 @@ export async function onRequestPost(context) {
       }
     });
     
+    console.log('📊 PUT response status:', putResponse.status);
+    console.log('📊 PUT response headers:', Object.fromEntries(putResponse.headers));
+    
     if (!putResponse.ok) {
       const errorText = await putResponse.text();
       console.error('❌ Failed to upload video:', errorText);
       throw new Error(`Failed to upload video: ${putResponse.status} - ${errorText}`);
     }
     
-    console.log('✅ Video uploaded successfully');
+    console.log('✅ Video uploaded to S3 successfully');
+    
+    // STEP 2.5: Check if we need to wait for import to complete
+    console.log('⏳ Checking if upload needs processing...');
+    
+    // Some services require checking status after upload
+    // Try to get the source status
+    const statusUrl = `${baseUrl}/ingest/${stage}/sources/${sourceId}`;
+    console.log(`📍 Checking source status at: ${statusUrl}`);
+    
+    const statusResponse = await fetch(statusUrl, {
+      method: 'GET',
+      headers: {
+        'x-api-key': apiKey
+      }
+    });
+    
+    if (statusResponse.ok) {
+      const statusData = await statusResponse.json();
+      console.log('📊 Source status:', JSON.stringify(statusData, null, 2));
+      
+      // Check if status indicates it's still processing
+      const status = statusData.data?.attributes?.status;
+      console.log(`📊 Import status: ${status}`);
+      
+      if (status === 'importing' || status === 'queued') {
+        console.log('⏳ Source is still importing, waiting...');
+        // You might need to poll here until status is 'ready'
+      }
+    }
     
     // Construct the source URL from the source ID
     // Format: https://shotstack-api-{stage}-sources.s3.amazonaws.com/{sourceId}
