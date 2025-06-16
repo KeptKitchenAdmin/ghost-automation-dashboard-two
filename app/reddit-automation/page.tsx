@@ -7,6 +7,7 @@ const VideoGenerator = () => {
   const [settings, setSettings] = useState({
     uploadedVideo: null,
     category: 'drama',
+    targetDuration: 5, // User-chosen duration in minutes
     voiceId: 'Adam',
     startTime: 0, // Start time in seconds for video trimming
     useProduction: false // Toggle between sandbox and production APIs
@@ -23,7 +24,6 @@ const VideoGenerator = () => {
   const [availableStories, setAvailableStories] = useState([]);
   const [selectedStory, setSelectedStory] = useState(null);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
-  const [calculatedDuration, setCalculatedDuration] = useState(0);
 
   const categories = [
     { id: 'drama', name: 'Drama', description: 'Relationship conflicts and life drama' },
@@ -42,73 +42,51 @@ const VideoGenerator = () => {
 
   // Stories will load when user selects category or clicks refresh
 
-  // Handle video file upload - client-side for direct Shotstack integration
+  // Handle video file upload - keep file object, no conversion
   const handleVideoUpload = async (file) => {
     if (!file) return;
     
     setIsUploading(true);
-    setUploadProgress(0);
     setError('');
     
     try {
-      // Convert file to base64 for Shotstack API
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64Data = event.target.result;
-        
-        setSettings(prev => ({
-          ...prev,
-          uploadedVideo: {
-            file: file,
-            base64: base64Data,
-            name: file.name,
-            size: file.size,
-            type: file.type
-          }
-        }));
-        
-        setUploadProgress(100);
-      };
+      // Just store the file object - NO base64 conversion!
+      console.log(`📁 Video selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
       
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = (event.loaded / event.total) * 100;
-          setUploadProgress(progress);
+      setSettings(prev => ({
+        ...prev,
+        uploadedVideo: {
+          file: file,
+          name: file.name,
+          size: file.size,
+          type: file.type
         }
-      };
+      }));
       
-      reader.readAsDataURL(file);
+      setIsUploading(false);
       
     } catch (error) {
-      console.error('File processing error:', error);
-      setError(`File processing failed: ${error.message}`);
+      console.error('File selection error:', error);
+      setError(`File selection failed: ${error.message}`);
       setIsUploading(false);
     }
   };
 
-  // Calculate story duration at 1.3x speed
-  const calculateStoryDuration = (story) => {
+  // Calculate if story matches target duration
+  const getEstimatedDuration = (story) => {
     if (!story) return 0;
     const wordCount = story.content.split(' ').length;
-    
-    // Normal reading speed: 150 WPM
-    // At 1.3x speed: 150 / 1.3 = ~115 WPM (slower because we're speeding up AFTER recording)
-    const wordsPerMinute = 115; 
-    const durationMinutes = wordCount / wordsPerMinute;
-    
-    console.log(`Story calculation: ${wordCount} words ÷ ${wordsPerMinute} WPM = ${durationMinutes.toFixed(1)} minutes`);
-    
-    return Math.ceil(durationMinutes * 60); // Convert to seconds
+    const wordsPerMinute = 150 * 1.3; // 195 WPM at 1.3x speed
+    return wordCount / wordsPerMinute; // Returns minutes
   };
 
-  // Fetch fresh Reddit stories
-  const fetchStories = async (category) => {
+  // Fetch fresh Reddit stories based on target duration
+  const fetchStories = async (category, targetDuration = settings.targetDuration) => {
     setIsLoadingStories(true);
     setError('');
     
     // Clear current selection to force fresh selection
     setSelectedStory(null);
-    setCalculatedDuration(0);
     setAvailableStories([]);
     
     try {
@@ -121,9 +99,10 @@ const VideoGenerator = () => {
         },
         body: JSON.stringify({
           category: category,
-          limit: 10,
+          targetDuration: targetDuration, // Send user's chosen duration
+          limit: 15, // Get more stories to find good matches
           refresh: Date.now(),
-          random: Math.random() // Extra randomization
+          random: Math.random()
         })
       });
 
@@ -138,20 +117,20 @@ const VideoGenerator = () => {
         throw new Error(result.error || 'Failed to fetch stories');
       }
 
-      // Calculate duration for each story
+      // Use backend-calculated duration (more accurate and consistent)
       const storiesWithDuration = result.stories ? result.stories.map(story => ({
         ...story,
-        calculatedDuration: calculateStoryDuration(story)
+        estimatedDuration: story.estimated_duration_minutes || getEstimatedDuration(story) // Fallback to old method if backend doesn't provide it
       })) : [{
         ...result.story,
-        calculatedDuration: calculateStoryDuration(result.story)
+        estimatedDuration: result.story.estimated_duration_minutes || getEstimatedDuration(result.story)
       }];
 
       setAvailableStories(storiesWithDuration);
       
       // DON'T auto-select story - let user choose manually
-      console.log(`✅ Loaded ${storiesWithDuration.length} fresh stories:`, 
-        storiesWithDuration.map(s => `${s.title} (${s.content.split(' ').length} words)`));
+      console.log(`✅ Loaded ${storiesWithDuration.length} stories for ${targetDuration}-minute target:`, 
+        storiesWithDuration.map(s => `${s.title} (${s.estimatedDuration.toFixed(1)} min)`));
       
     } catch (error) {
       console.error('Failed to fetch stories:', error);
@@ -161,10 +140,10 @@ const VideoGenerator = () => {
     }
   };
 
-  // Calculate estimated costs
+  // Calculate estimated costs based on target duration
   const estimatedCost = () => {
-    if (!selectedStory || calculatedDuration === 0) return 0;
-    const durationMinutes = calculatedDuration / 60;
+    if (!selectedStory) return 0;
+    const durationMinutes = settings.targetDuration;
     const shotstackCost = durationMinutes * 0.40;
     const claudeCost = Math.min(0.50, durationMinutes * 0.03);
     const elevenlabsCost = (durationMinutes * 250) / 1000 * 0.018;
@@ -197,30 +176,28 @@ const VideoGenerator = () => {
       // Step 3: 🔒 SECURE - Generate video via server-side function
       setProgress('🎬 Generating video (server processing)...');
       
+      // Send file and metadata separately using FormData
+      const formData = new FormData();
+      formData.append('videoFile', settings.uploadedVideo.file);
+      formData.append('data', JSON.stringify({
+        selectedStory: selectedStory,
+        targetDuration: settings.targetDuration,
+        voiceSettings: {
+          voice_id: settings.voiceId,
+          stability: 0.75,
+          similarity_boost: 0.85,
+          speed: 1.3 // 1.3x speed for voiceover
+        },
+        duration: settings.targetDuration * 60, // Convert minutes to seconds
+        startTime: settings.startTime,
+        trimDuration: settings.targetDuration * 60, // Convert minutes to seconds
+        useProduction: settings.useProduction,
+        addCaptions: true
+      }));
+
       const videoResponse = await fetch('/api/generate-video-async', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          selectedStory: selectedStory,
-          uploadedVideo: {
-            base64: settings.uploadedVideo.base64,
-            filename: settings.uploadedVideo.name,
-            type: settings.uploadedVideo.type
-          },
-          voiceSettings: {
-            voice_id: settings.voiceId,
-            stability: 0.75,
-            similarity_boost: 0.85,
-            speed: 1.3 // 1.3x speed for voiceover
-          },
-          duration: calculatedDuration,
-          startTime: settings.startTime,
-          trimDuration: calculatedDuration,
-          useProduction: settings.useProduction,
-          addCaptions: true
-        })
+        body: formData // NO Content-Type header - let browser set it for FormData
       });
 
       if (!videoResponse.ok) {
@@ -235,29 +212,23 @@ const VideoGenerator = () => {
         throw new Error(videoResult.error || 'Video generation failed');
       }
 
-      // For async processing, show different UI
-      if (videoResult.ingest_id) {
-        setProgress('🔄 Video processing started! This will take 5-10 minutes...');
+      // Show processing status
+      if (videoResult.render_id) {
+        setProgress('🔄 Video processing started! This will take 3-5 minutes...');
         setGeneratedVideo({
           videoUrl: null, // No video yet
           audioUrl: null,
           story: selectedStory,
           costs: { shotstack_cost: 0, elevenlabs_cost: 0, total_cost: 0 },
           mode: 'processing',
-          ingest_id: videoResult.ingest_id,
+          render_id: videoResult.render_id,
+          source_id: videoResult.source_id,
           status_url: videoResult.status_check_url,
           message: videoResult.message
         });
       } else {
-        // Step 3: ✅ SECURE - Server processed everything safely
-        setProgress('✅ Video generation complete!');
-        setGeneratedVideo({
-          videoUrl: videoResult.videoUrl,
-          audioUrl: videoResult.audioUrl,
-          story: selectedStory,
-          costs: videoResult.costs,
-          mode: videoResult.mode
-        });
+        // Should not reach here with new workflow
+        setError('Unexpected response from video generation API');
       }
 
     } catch (error) {
@@ -396,6 +367,37 @@ const VideoGenerator = () => {
               </div>
             </div>
 
+            {/* Target Duration - USER CONTROL */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Target Video Duration
+              </label>
+              <select
+                value={settings.targetDuration}
+                onChange={(e) => {
+                  const newDuration = parseInt(e.target.value);
+                  setSettings(prev => ({ ...prev, targetDuration: newDuration }));
+                  // Refresh stories when duration changes
+                  if (settings.category) {
+                    fetchStories(settings.category, newDuration);
+                  }
+                }}
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                disabled={isGenerating || isLoadingStories}
+              >
+                <option value={2}>2 minutes</option>
+                <option value={3}>3 minutes</option>
+                <option value={5}>5 minutes</option>
+                <option value={7}>7 minutes</option>
+                <option value={10}>10 minutes</option>
+                <option value={12}>12 minutes</option>
+                <option value={15}>15 minutes</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Stories will be filtered to match this duration
+              </p>
+            </div>
+
             {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -406,7 +408,7 @@ const VideoGenerator = () => {
                 onChange={(e) => {
                   const newCategory = e.target.value;
                   setSettings(prev => ({ ...prev, category: newCategory }));
-                  fetchStories(newCategory); // Auto-fetch stories when category changes
+                  fetchStories(newCategory, settings.targetDuration);
                 }}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 disabled={isGenerating || isLoadingStories}
@@ -416,11 +418,11 @@ const VideoGenerator = () => {
                 ))}
               </select>
               <button
-                onClick={() => fetchStories(settings.category)}
+                onClick={() => fetchStories(settings.category, settings.targetDuration)}
                 disabled={isLoadingStories || isGenerating}
                 className="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded text-sm transition-colors"
               >
-                {isLoadingStories ? 'Loading...' : 'Refresh Stories'}
+                {isLoadingStories ? 'Loading...' : 'Find Stories for This Duration'}
               </button>
             </div>
 
@@ -464,26 +466,21 @@ const VideoGenerator = () => {
               <p className="mt-1 text-xs text-gray-500">Choose where to start using your uploaded video</p>
             </div>
 
-            {/* Calculated Duration Display */}
+            {/* Current Target Display */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Video Duration (Auto-calculated)
+                Selected Configuration
               </label>
               <div className="px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-gray-400" />
-                  <span className="text-gray-400 font-medium">
-                    {selectedStory && calculatedDuration > 0 ? 
-                      `${Math.floor(calculatedDuration / 60)}:${(calculatedDuration % 60).toString().padStart(2, '0')}` 
-                      : 'Select a story below to calculate duration'
-                    }
+                  <Clock size={16} className="text-blue-400" />
+                  <span className="text-white font-medium">
+                    {settings.targetDuration} minute {settings.category} video
                   </span>
                 </div>
-                {selectedStory && calculatedDuration > 0 && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    Based on {selectedStory.content.split(' ').length} words at 1.3x voiceover speed
-                  </p>
-                )}
+                <p className="text-xs text-gray-400 mt-1">
+                  Shotstack will generate voiceover and trim video to exactly {settings.targetDuration} minutes
+                </p>
               </div>
             </div>
 
@@ -530,7 +527,7 @@ const VideoGenerator = () => {
                 <div className="flex items-center gap-2">
                   <DollarSign size={16} className="text-green-400" />
                   <span className="text-white font-medium">
-                    {selectedStory && calculatedDuration > 0 ? 
+                    {selectedStory ? 
                       (settings.useProduction ? `$${estimatedCost().toFixed(2)}` : '$0.00 (Sandbox)')
                       : 'Select story to see cost'
                     }
@@ -540,8 +537,97 @@ const VideoGenerator = () => {
             </div>
           </div>
 
-          {/* Generate Button */}
-          <div className="mt-8">
+        </div>
+
+        {/* Story Browser */}
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-6">
+            Reddit Stories for {settings.targetDuration}-Minute Video
+          </h2>
+          
+          {availableStories.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400 mb-4">
+                Choose duration and category above to find matching Reddit stories
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {availableStories.map((story, index) => {
+                const matchQuality = Math.abs(story.estimatedDuration - settings.targetDuration);
+                const isGoodMatch = matchQuality <= 1; // Within 1 minute
+                
+                return (
+                  <div
+                    key={story.id}
+                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${ 
+                      selectedStory?.id === story.id 
+                        ? 'border-blue-500 bg-blue-900/20' 
+                        : isGoodMatch
+                        ? 'border-green-500/50 bg-gray-700/50 hover:bg-gray-700'
+                        : 'border-gray-600 bg-gray-700/50 hover:bg-gray-700'
+                    }`}
+                    onClick={() => {
+                      setSelectedStory(story);
+                    }}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-white font-medium">{story.title}</h3>
+                      <div className="flex gap-2 text-xs">
+                        <span className="px-2 py-1 bg-gray-600 rounded text-white">
+                          r/{story.subreddit}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-white ${
+                          isGoodMatch ? 'bg-green-600' : 'bg-yellow-600'
+                        }`}>
+                          {story.estimatedDuration.toFixed(1)} min
+                        </span>
+                        {isGoodMatch && (
+                          <span className="px-2 py-1 bg-green-500 rounded text-white">
+                            Perfect Match
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-300 text-sm line-clamp-3 mb-3">
+                      {story.content.substring(0, 200)}...
+                    </p>
+                    
+                    <div className="flex justify-between items-center text-xs text-gray-400">
+                      <div className="flex gap-4">
+                        <span>👍 {story.upvotes}</span>
+                        <span>💬 {story.comments}</span>
+                        <span>🔥 {Math.round(story.viral_score)}</span>
+                      </div>
+                      <span className="font-medium">
+                        {Math.round(story.content.split(' ').length)} words
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          
+          {selectedStory && (
+            <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500 rounded-lg">
+              <h3 className="text-blue-300 font-medium mb-2">Selected Story for {settings.targetDuration}-Minute Video</h3>
+              <p className="text-white font-medium">{selectedStory.title}</p>
+              <p className="text-gray-300 text-sm mt-1">
+                Estimated: {selectedStory.estimatedDuration.toFixed(1)} minutes 
+                ({Math.round(selectedStory.content.split(' ').length)} words)
+              </p>
+              <p className="text-green-400 text-xs mt-1">
+                ✅ Shotstack will generate exact {settings.targetDuration}-minute voiceover at 1.3x speed
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Generate Video Button */}
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <div className="mt-4">
             <button
               onClick={generateVideo}
               disabled={isGenerating || !settings.uploadedVideo || !selectedStory}
@@ -559,73 +645,19 @@ const VideoGenerator = () => {
                 </>
               )}
             </button>
-          </div>
-        </div>
-
-        {/* Story Browser */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-6">Select Reddit Story</h2>
-          
-          {availableStories.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-400 mb-4">Select a category above to load real Reddit stories</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {availableStories.map((story, index) => (
-                <div
-                  key={story.id}
-                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${ 
-                    selectedStory?.id === story.id 
-                      ? 'border-blue-500 bg-blue-900/20' 
-                      : 'border-gray-600 bg-gray-700/50 hover:bg-gray-700'
-                  }`}
-                  onClick={() => {
-                    setSelectedStory(story);
-                    setCalculatedDuration(story.calculatedDuration);
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-white font-medium">{story.title}</h3>
-                    <div className="flex gap-2 text-xs">
-                      <span className="px-2 py-1 bg-gray-600 rounded text-white">
-                        r/{story.subreddit}
-                      </span>
-                      <span className="px-2 py-1 bg-blue-600 rounded text-white">
-                        {Math.floor(story.calculatedDuration / 60)}:{(story.calculatedDuration % 60).toString().padStart(2, '0')}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-300 text-sm line-clamp-3 mb-3">
-                    {story.content.substring(0, 200)}...
-                  </p>
-                  
-                  <div className="flex justify-between items-center text-xs text-gray-400">
-                    <div className="flex gap-4">
-                      <span>👍 {story.upvotes}</span>
-                      <span>💬 {story.comments}</span>
-                      <span>🔥 {Math.round(story.viral_score)}</span>
-                    </div>
-                    <span className="font-medium">
-                      {Math.round(story.content.split(' ').length / 115)} min @ 1.3x speed
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {selectedStory && (
-            <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500 rounded-lg">
-              <h3 className="text-blue-300 font-medium mb-2">Selected Story</h3>
-              <p className="text-white font-medium">{selectedStory.title}</p>
-              <p className="text-gray-300 text-sm mt-1">
-                Duration: {Math.floor(calculatedDuration / 60)}:{(calculatedDuration % 60).toString().padStart(2, '0')} 
-                ({Math.round(selectedStory.content.split(' ').length)} words at 1.3x speed)
+            
+            {!selectedStory && (
+              <p className="text-center text-gray-400 text-sm mt-2">
+                Select a story above to generate video
               </p>
-            </div>
-          )}
+            )}
+            
+            {selectedStory && !settings.uploadedVideo && (
+              <p className="text-center text-red-400 text-sm mt-2">
+                Upload a background video to continue
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Progress */}
@@ -706,7 +738,7 @@ const VideoGenerator = () => {
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Duration:</span>
-                      <span className="text-white">{Math.floor(calculatedDuration / 60)}:{(calculatedDuration % 60).toString().padStart(2, '0')}</span>
+                      <span className="text-white">{settings.targetDuration} minutes</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Voice:</span>

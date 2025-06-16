@@ -28,13 +28,13 @@ export async function onRequestPost(context) {
     const requestBody = await request.json();
     console.log('Request body:', requestBody);
     
-    const { category, duration, limit = 5, refresh } = requestBody;
+    const { category, targetDuration, duration, limit = 5, refresh } = requestBody;
     
-    console.log(`🔍 Server: Finding Reddit stories for category: ${category}`);
+    console.log(`🔍 Server: Finding Reddit stories for category: ${category}, target duration: ${targetDuration} minutes`);
     
     // Step 1: Scrape Reddit stories (server-side for better reliability)
     console.log(`🔄 Refresh request: ${refresh ? 'YES' : 'NO'}, fetching ${limit} stories`);
-    const stories = await scrapeRedditStories(category, limit, refresh);
+    const stories = await scrapeRedditStories(category, limit, refresh, targetDuration);
     if (stories.length === 0) {
       return new Response(JSON.stringify({
         success: false,
@@ -96,7 +96,7 @@ export async function onRequestPost(context) {
 }
 
 // Reddit scraping logic (server-side)
-async function scrapeRedditStories(category, limit = 5, refresh = false) {
+async function scrapeRedditStories(category, limit = 5, refresh = false, targetDuration = 5) {
   // Use multiple subreddits for more variety, especially on refresh
   const subredditsByCategory = {
     drama: ['AmItheAsshole', 'relationships', 'relationship_advice', 'TrueOffMyChest'],
@@ -165,12 +165,17 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
       for (const post of posts) {
         const postData = post.data;
         
-        // Filter for longer, quality content suitable for 5-15 minute videos
+        // Calculate estimated duration for this story
+        const estimatedDurationMinutes = estimateDurationInMinutes(postData.selftext);
+        const durationDiff = Math.abs(estimatedDurationMinutes - targetDuration);
+        
+        // Filter for quality content that matches target duration
         if (
           postData.upvote_ratio < 0.8 ||
           postData.ups < 500 ||
-          postData.selftext.length < 800 || // Minimum 800 chars for ~5 min video
-          postData.selftext.length > 8000 || // Maximum 8000 chars for ~15 min video  
+          postData.selftext.length < 300 || // Minimum content length
+          postData.selftext.length > 12000 || // Maximum content length
+          durationDiff > 3 || // Only stories within 3 minutes of target
           postData.over_18 ||
           postData.stickied ||
           containsProblematicContent(postData.selftext)
@@ -189,14 +194,16 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
           url: `https://reddit.com${postData.permalink}`,
           viral_score: calculateViralScore(postData),
           category,
-          estimated_duration: estimateDuration(postData.selftext)
+          estimated_duration: estimateDuration(postData.selftext),
+          estimated_duration_minutes: estimatedDurationMinutes,
+          duration_match_score: Math.max(0, 10 - durationDiff) // Higher score for better matches
         };
         
         stories.push(story);
       }
       
-      console.log(`📊 Found ${stories.length} quality stories from r/${targetSubreddit}`);
-      console.log(`🎯 Story word counts:`, stories.map(s => `${s.title.substring(0, 30)}... (${s.content.split(' ').length} words)`));
+      console.log(`📊 Found ${stories.length} quality stories from r/${targetSubreddit} matching ${targetDuration} min target`);
+      console.log(`🎯 Duration matches:`, stories.map(s => `${s.title.substring(0, 30)}... (${s.estimated_duration_minutes?.toFixed(1)}min, score: ${s.duration_match_score})`));
     }
   } catch (error) {
     console.error(`❌ Error scraping r/${targetSubreddit}:`, error.message);
@@ -210,19 +217,28 @@ async function scrapeRedditStories(category, limit = 5, refresh = false) {
       id: "fallback_001",
       title: "When Everything Goes Wrong (Reddit Story)",
       content: "So this happened to me last week and I'm still processing it. I was having what I thought was a normal day when suddenly everything started going sideways. The details are absolutely insane and I need to share this story because I genuinely don't know if I handled it right. It all started when I woke up that Tuesday morning. I had planned to have a productive day - you know, tackle some work projects, maybe clean the house a bit, normal stuff. But from the moment I stepped out of bed, things just felt off. First, my coffee maker decided to completely break down. Not just malfunction - I'm talking full electrical failure with sparks and everything. I should have taken that as a sign. Then my car wouldn't start. The battery was completely dead even though it was fine the night before. I called my neighbor to jump it, but even that didn't work. Something was clearly wrong with the alternator. So there I was, stranded at home with no coffee and no transportation. I decided to work from home instead, but then my internet went out. Not just slow - completely down. I called the provider and they said there was no outage in my area. Just my house, apparently. At this point I'm starting to think the universe is conspiring against me. But it gets worse. Around noon, I hear this commotion outside. I look out my window and there's this massive tree that had fallen across the street, completely blocking traffic. It hadn't even been windy that morning. The tree just... fell. And of course, it took out power lines with it, which explained my internet issues. But here's where it gets really crazy. As I'm standing there looking at this tree, my phone rings. It's my boss, and she's furious. Apparently, some important emails I thought I'd sent yesterday never actually went through. The client is threatening to cancel our biggest contract. She needs me in the office immediately to fix this mess. I try to explain about my car, the tree, everything that's going wrong, but she just thinks I'm making excuses. So I start walking. It's about three miles to the office, and I figure the exercise might clear my head anyway. But halfway there, it starts pouring rain. Not just a light drizzle - I'm talking biblical proportions. I take shelter under this bus stop, and that's when I notice there's this guy there who's clearly having an even worse day than me. He's soaked, his briefcase is broken, papers scattered everywhere, and he's just sitting there looking defeated. We start talking, and it turns out he's dealing with his own series of impossible coincidences. His story is even crazier than mine. Long story short, we end up helping each other out, I make it to the office, save the client relationship, and somehow everything works out. But the whole experience really made me think about how we handle adversity and whether these kinds of days happen to test us or if it's all just random chaos. What would you have done in my situation?",
-      subreddit: primarySubreddits[category] || 'AmItheAsshole',
+      subreddit: availableSubreddits[0] || 'AmItheAsshole',
       upvotes: 2500,
       comments: 340,
       created_utc: Date.now() / 1000,
       url: "https://reddit.com/fallback",
       viral_score: 75,
       category,
-      estimated_duration: 600
+      estimated_duration: 600,
+      estimated_duration_minutes: targetDuration, // Match target exactly for fallback
+      duration_match_score: 10 // Perfect match score
     }];
   }
   
-  // Sort and randomize results for fresh content
-  const sortedStories = stories.sort((a, b) => b.viral_score - a.viral_score);
+  // Sort by duration match first, then viral score for better targeting
+  const sortedStories = stories.sort((a, b) => {
+    // First sort by duration match score (higher is better)
+    const durationCompare = (b.duration_match_score || 0) - (a.duration_match_score || 0);
+    if (durationCompare !== 0) return durationCompare;
+    
+    // Then by viral score
+    return b.viral_score - a.viral_score;
+  });
   
   if (refresh && sortedStories.length > limit) {
     // On refresh, randomize selection from top stories
@@ -303,6 +319,12 @@ function calculateViralScore(postData) {
 function estimateDuration(content) {
   const wordCount = content.split(' ').length;
   return Math.ceil((wordCount / 150) * 60);
+}
+
+function estimateDurationInMinutes(content) {
+  const wordCount = content.split(' ').length;
+  const wordsPerMinute = 150 * 1.3; // 195 WPM at 1.3x speed (same as frontend)
+  return wordCount / wordsPerMinute; // Returns minutes as decimal
 }
 
 function containsProblematicContent(text) {

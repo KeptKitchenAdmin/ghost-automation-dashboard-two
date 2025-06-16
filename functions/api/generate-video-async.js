@@ -1,127 +1,207 @@
 /**
- * Async Shotstack Ingest + Render (Non-blocking)
- * Returns immediately with job ID, check status separately
+ * Proper Shotstack Video Generation with 3-Step Upload Workflow
+ * 1. Get signed upload URL from Shotstack
+ * 2. Upload raw video file to signed URL
+ * 3. Create render with source URL + voiceover script
  */
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   
   try {
+    console.log(`🎬 Starting Shotstack video generation...`);
+    
+    // Parse FormData
+    const formData = await request.formData();
+    const videoFile = formData.get('videoFile');
+    const data = JSON.parse(formData.get('data'));
+    
     const {
-      enhancedScript,
-      backgroundVideoUrl,
-      uploadedVideo,
+      selectedStory,
+      targetDuration,
       voiceSettings,
       duration,
       startTime,
       trimDuration,
       useProduction = false,
       addCaptions = true
-    } = await request.json();
+    } = data;
     
-    console.log(`🎬 Server: Starting ASYNC Shotstack process`);
-    
-    // Handle uploaded video file or URL
-    let actualVideoUrl;
-    if (uploadedVideo) {
-      console.log(`📹 Processing uploaded video: ${uploadedVideo.filename}`);
-      // For uploaded videos, we need to process the base64 data
-      // Shotstack can accept base64 data directly in some cases, or we need to convert it
-      actualVideoUrl = uploadedVideo.base64;
-    } else if (backgroundVideoUrl) {
-      console.log(`📹 Input URL: ${backgroundVideoUrl}`);
-      actualVideoUrl = backgroundVideoUrl;
-    } else {
-      throw new Error('No video source provided - need either uploadedVideo or backgroundVideoUrl');
+    if (!videoFile) {
+      throw new Error('No video file provided');
     }
+    
+    console.log(`📹 Processing video: ${videoFile.name} (${(videoFile.size / 1024 / 1024).toFixed(1)}MB)`);
+    console.log(`📖 Story: ${selectedStory.title} (${targetDuration} minutes)`);
     
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 
       : env.SHOTSTACK_SANDBOX_API_KEY;
     
-    const ownerId = useProduction
-      ? env.SHOTSTACK_PRODUCTION_OWNER_ID
-      : env.SHOTSTACK_SANDBOX_OWNER_ID;
-    
-    if (!apiKey || !ownerId) {
-      const mode = useProduction ? 'Production' : 'Sandbox';
-      throw new Error(`${mode} Shotstack API key or Owner ID not configured`);
+    if (!apiKey) {
+      throw new Error(`Shotstack API key not configured for ${useProduction ? 'production' : 'sandbox'} mode`);
     }
     
-    // STEP 1: START INGEST (NON-BLOCKING)
-    console.log('📥 Starting video ingest...');
-    const ingestUrl = useProduction 
-      ? 'https://api.shotstack.io/ingest/v1/sources'
-      : 'https://api.shotstack.io/ingest/stage/sources';
+    const baseUrl = useProduction 
+      ? 'https://api.shotstack.io' 
+      : 'https://api.shotstack.io';
+      
+    const stage = useProduction ? 'v1' : 'stage';
     
-    let ingestBody;
-    if (uploadedVideo) {
-      // For uploaded videos, use Shotstack's upload endpoint
-      console.log('📤 Uploading video file to Shotstack...');
-      ingestBody = {
-        url: actualVideoUrl // Base64 data URL
-      };
-    } else {
-      // For URL-based videos
-      ingestBody = {
-        url: actualVideoUrl
-      };
-    }
+    // STEP 1: Get signed upload URL from Shotstack
+    console.log('📝 Step 1: Getting signed upload URL from Shotstack...');
     
-    const ingestResponse = await fetch(ingestUrl, {
+    const uploadResponse = await fetch(`${baseUrl}/ingest/${stage}/upload`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'x-shotstack-owner': ownerId
+        'x-api-key': apiKey
       },
-      body: JSON.stringify(ingestBody)
+      body: JSON.stringify({}) // Empty body as per docs
     });
     
-    console.log(`📥 Ingest response: ${ingestResponse.status} ${ingestResponse.statusText}`);
-    
-    if (!ingestResponse.ok) {
-      const errorText = await ingestResponse.text();
-      console.error('❌ Ingest failed:', errorText);
-      console.error('❌ Request details:', {
-        url: ingestUrl,
-        method: 'POST',
-        hasApiKey: !!apiKey,
-        hasOwnerId: !!ownerId,
-        youtubeUrl: backgroundVideoUrl
-      });
-      throw new Error(`Shotstack ingest failed: ${ingestResponse.status} - ${errorText}`);
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('❌ Failed to get upload URL:', errorText);
+      throw new Error(`Failed to get upload URL: ${uploadResponse.status} - ${errorText}`);
     }
     
-    const ingestData = await ingestResponse.json();
-    console.log('✅ Ingest started:', ingestData.data.id);
+    const uploadData = await uploadResponse.json();
+    console.log('✅ Got signed upload URL and source ID');
     
-    // RETURN IMMEDIATELY - Don't wait for completion
+    const signedUrl = uploadData.data.attributes.url;
+    const sourceId = uploadData.data.attributes.id;
+    const sourceUrl = uploadData.data.attributes.src;
+    
+    // STEP 2: Upload raw video file to signed URL
+    console.log('📤 Step 2: Uploading video file to signed URL...');
+    
+    // Convert file to ArrayBuffer for upload
+    const videoBuffer = await videoFile.arrayBuffer();
+    
+    const putResponse = await fetch(signedUrl, {
+      method: 'PUT',
+      body: videoBuffer,
+      // IMPORTANT: Do NOT set Content-Type header as per Shotstack docs
+      headers: {
+        'Content-Length': videoFile.size.toString()
+      }
+    });
+    
+    if (!putResponse.ok) {
+      const errorText = await putResponse.text();
+      console.error('❌ Failed to upload video:', errorText);
+      throw new Error(`Failed to upload video: ${putResponse.status} - ${errorText}`);
+    }
+    
+    console.log('✅ Video uploaded successfully');
+    
+    // STEP 3: Create render with source URL + voiceover
+    console.log('🎥 Step 3: Creating render with voiceover...');
+    
+    // Create the timeline with video and voiceover
+    const timeline = {
+      tracks: [
+        {
+          // Video track
+          clips: [{
+            asset: {
+              type: "video",
+              src: sourceUrl // Use the source URL from step 1
+            },
+            start: 0,
+            length: trimDuration || duration,
+            offset: {
+              x: 0,
+              y: 0
+            },
+            scale: 1
+          }]
+        },
+        {
+          // Voiceover track using Shotstack's ElevenLabs integration via Create API
+          clips: [{
+            asset: {
+              type: "audio",
+              provider: "elevenlabs",
+              options: {
+                type: "text-to-speech",
+                text: selectedStory.content, // The Reddit story text
+                voice: voiceSettings.voice_id // e.g., "Adam", "Bella", etc.
+              }
+            },
+            start: 0,
+            length: trimDuration || duration
+          }]
+        }
+      ]
+    };
+    
+    // Add captions track if requested
+    if (addCaptions) {
+      timeline.tracks.push({
+        clips: [{
+          asset: {
+            type: "html",
+            html: `<div style="font-family: Arial; font-size: 24px; color: white; text-align: center; background: rgba(0,0,0,0.8); padding: 10px;">{{caption}}</div>`,
+            width: 1920,
+            height: 100
+          },
+          start: 0,
+          length: trimDuration || duration,
+          position: "bottom"
+        }]
+      });
+    }
+    
+    const renderBody = {
+      timeline: timeline,
+      output: {
+        format: "mp4",
+        resolution: "hd",
+        fps: 30
+      },
+      callback: env.SHOTSTACK_CALLBACK_URL || null
+    };
+    
+    const renderResponse = await fetch(`${baseUrl}/edit/${stage}/render`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify(renderBody)
+    });
+    
+    if (!renderResponse.ok) {
+      const errorText = await renderResponse.text();
+      console.error('❌ Failed to create render:', errorText);
+      throw new Error(`Failed to create render: ${renderResponse.status} - ${errorText}`);
+    }
+    
+    const renderData = await renderResponse.json();
+    const renderId = renderData.data.id;
+    
+    console.log(`✅ Render started with ID: ${renderId}`);
+    
     return new Response(JSON.stringify({
       success: true,
-      message: "Video generation started! Check status with the ingest ID.",
-      ingest_id: ingestData.data.id,
-      estimated_time: "5-10 minutes",
-      status_check_url: `/api/shotstack-status?id=${ingestData.data.id}`,
-      debug: {
-        video_source: uploadedVideo ? 'uploaded_file' : 'url',
-        video_url: backgroundVideoUrl,
-        uploaded_filename: uploadedVideo?.filename,
-        start_time: startTime,
-        duration: duration,
-        trim_duration: trimDuration,
-        mode: useProduction ? 'production' : 'sandbox'
-      }
+      message: "Video generation started successfully!",
+      render_id: renderId,
+      source_id: sourceId,
+      estimated_time: "3-5 minutes",
+      status_check_url: `/api/shotstack-status?id=${renderId}`,
+      mode: useProduction ? 'production' : 'sandbox'
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
     
   } catch (error) {
-    console.error('❌ Server: Async video generation failed:', error);
+    console.error('❌ Video generation failed:', error);
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Failed to start video generation'
+      error: error.message || 'Failed to generate video'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -129,174 +209,3 @@ export async function onRequestPost(context) {
   }
 }
 
-// Helper functions for YouTube URL processing
-function isYouTubeUrl(url) {
-  return url.includes('youtube.com') || url.includes('youtu.be');
-}
-
-async function extractYouTubeUrl(youtubeUrl) {
-  // Extract video ID from YouTube URL
-  const videoId = extractVideoId(youtubeUrl);
-  if (!videoId) {
-    throw new Error('Invalid YouTube URL format');
-  }
-  
-  // Try multiple extraction methods
-  return await extractWithPublicAPI(videoId);
-}
-
-function extractVideoId(url) {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /youtube\.com\/v\/([^&\n?#]+)/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
-}
-
-async function extractWithPublicAPI(videoId) {
-  // Method 1: Try YouTube Video Downloader API (RapidAPI)
-  try {
-    console.log('🔍 Trying YouTube Video Downloader API...');
-    
-    const response = await fetch(`https://youtube-video-download-info.p.rapidapi.com/dl?id=${videoId}`, {
-      headers: {
-        'X-RapidAPI-Key': env.RAPIDAPI_KEY || 'demo-key',
-        'X-RapidAPI-Host': 'youtube-video-download-info.p.rapidapi.com'
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log(`✅ RapidAPI response received for: ${data.title}`);
-      
-      // Look for MP4 links
-      const mp4Links = data.link?.filter(link => 
-        link.type === 'mp4' && link.size && link.link
-      );
-      
-      if (mp4Links && mp4Links.length > 0) {
-        // Sort by quality (720p, 480p, etc.)
-        const bestLink = mp4Links.sort((a, b) => 
-          parseInt(b.q?.replace('p', '') || '0') - parseInt(a.q?.replace('p', '') || '0')
-        )[0];
-        
-        console.log(`✅ Found MP4 via RapidAPI: ${bestLink.q}`);
-        return bestLink.link;
-      }
-    }
-  } catch (error) {
-    console.log('❌ RapidAPI YouTube downloader failed:', error.message);
-  }
-  
-  // Method 2: Try YouTube Media Downloader API
-  try {
-    console.log('🔍 Trying YouTube Media Downloader API...');
-    
-    const response = await fetch(`https://youtube-media-downloader.p.rapidapi.com/v2/video/details?videoId=${videoId}`, {
-      headers: {
-        'X-RapidAPI-Key': env.RAPIDAPI_KEY || 'demo-key',
-        'X-RapidAPI-Host': 'youtube-media-downloader.p.rapidapi.com'
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log(`✅ Media Downloader API response received`);
-      
-      // Look for video formats
-      const videoFormats = data.videos?.filter(video => 
-        video.extension === 'mp4' && video.url
-      );
-      
-      if (videoFormats && videoFormats.length > 0) {
-        // Get highest quality
-        const bestVideo = videoFormats.sort((a, b) => 
-          parseInt(b.quality?.replace('p', '') || '0') - parseInt(a.quality?.replace('p', '') || '0')
-        )[0];
-        
-        console.log(`✅ Found MP4 via Media Downloader: ${bestVideo.quality}`);
-        return bestVideo.url;
-      }
-    }
-  } catch (error) {
-    console.log('❌ Media Downloader API failed:', error.message);
-  }
-  
-  // Method 3: Try Social Media Video Downloader API
-  try {
-    console.log('🔍 Trying Social Media Downloader API...');
-    
-    const response = await fetch('https://social-media-video-downloader.p.rapidapi.com/smvd/get/all', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-RapidAPI-Key': env.RAPIDAPI_KEY || 'demo-key',
-        'X-RapidAPI-Host': 'social-media-video-downloader.p.rapidapi.com'
-      },
-      body: JSON.stringify({
-        url: `https://www.youtube.com/watch?v=${videoId}`
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log(`✅ Social Media Downloader response received`);
-      
-      // Look for video links
-      const videoLinks = data.links?.filter(link => 
-        link.type?.includes('video') && link.url
-      );
-      
-      if (videoLinks && videoLinks.length > 0) {
-        const bestVideo = videoLinks[0]; // Usually first is best quality
-        console.log(`✅ Found video via Social Media Downloader`);
-        return bestVideo.url;
-      }
-    }
-  } catch (error) {
-    console.log('❌ Social Media Downloader API failed:', error.message);
-  }
-  
-  // Method 4: Fallback to Invidious (free but less reliable)
-  const invidiousInstances = [
-    'https://invidious.kavin.rocks',
-    'https://vid.puffyan.us'
-  ];
-  
-  for (const instance of invidiousInstances) {
-    try {
-      console.log(`🔍 Trying Invidious fallback: ${instance}`);
-      
-      const response = await fetch(`${instance}/api/v1/videos/${videoId}`, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Ghost-Automation/1.0)'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        const mp4Streams = data.formatStreams?.filter(stream => 
-          stream.type?.includes('mp4') && stream.url
-        );
-        
-        if (mp4Streams && mp4Streams.length > 0) {
-          const bestStream = mp4Streams[0];
-          console.log(`✅ Found MP4 via Invidious fallback: ${bestStream.quality}`);
-          return bestStream.url;
-        }
-      }
-    } catch (error) {
-      console.log(`❌ Invidious ${instance} failed:`, error.message);
-      continue;
-    }
-  }
-  
-  // If all methods fail
-  throw new Error('YouTube extraction failed. All downloader services unavailable. Please add RAPIDAPI_KEY to environment variables or use a direct video URL.');
-}
