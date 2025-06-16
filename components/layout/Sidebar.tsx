@@ -44,6 +44,7 @@ export const Sidebar = () => {
             <Link
               key={item.name}
               href={item.href}
+              prefetch={false}
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${
                 isActive 
                   ? 'bg-blue-600 text-white' 
