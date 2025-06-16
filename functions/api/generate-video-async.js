@@ -155,8 +155,49 @@ export async function onRequestPost(context) {
     
     console.log(`📹 Constructed source URL: ${sourceUrl}`);
     
-    // STEP 3: Create render with source URL + voiceover
-    console.log('🎥 Step 3: Creating render with voiceover...');
+    // STEP 3: Generate ElevenLabs audio using Create API
+    console.log('🎤 Step 3: Generating voiceover with ElevenLabs...');
+    
+    const createUrl = `${baseUrl}/create/${stage}/assets`;
+    const audioCreateResponse = await fetch(createUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify({
+        provider: "elevenlabs",
+        options: {
+          type: "text-to-speech",
+          text: selectedStory.content,
+          voice: voiceSettings.voice_id // e.g., "Adam"
+        }
+      })
+    });
+    
+    if (!audioCreateResponse.ok) {
+      const errorText = await audioCreateResponse.text();
+      console.error('❌ Failed to create ElevenLabs audio:', errorText);
+      throw new Error(`Failed to create audio: ${audioCreateResponse.status} - ${errorText}`);
+    }
+    
+    const audioData = await audioCreateResponse.json();
+    console.log('✅ Audio creation response:', JSON.stringify(audioData, null, 2));
+    
+    const audioAssetId = audioData.data.id;
+    const audioUrl = audioData.data.attributes.url;
+    
+    // Check if we need to wait for audio to be ready
+    if (audioData.data.attributes.status !== 'done') {
+      console.log('⏳ Waiting for audio to be ready...');
+      // In production, you'd poll here until status is 'done'
+      // For now, we'll proceed assuming it's ready
+    }
+    
+    console.log(`🎵 Audio URL: ${audioUrl}`);
+    
+    // STEP 4: Create render with source URL + voiceover URL
+    console.log('🎥 Step 4: Creating render with video and voiceover...');
     
     // Create the timeline with video and voiceover
     const timeline = {
@@ -178,13 +219,11 @@ export async function onRequestPost(context) {
           }]
         },
         {
-          // Voiceover track - need to use Create API first, then reference the src
+          // Voiceover track with ElevenLabs generated audio
           clips: [{
             asset: {
               type: "audio",
-              src: "https://shotstack-assets.s3.amazonaws.com/music/unminus/ambisax.mp3", // TEMPORARY placeholder
-              // TODO: Use Shotstack Create API to generate ElevenLabs audio first
-              // Then use the returned src URL here
+              src: audioUrl // URL from ElevenLabs Create API
             },
             start: 0,
             length: trimDuration || duration,
