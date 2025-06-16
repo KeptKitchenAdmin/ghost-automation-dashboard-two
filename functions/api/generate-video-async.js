@@ -178,19 +178,17 @@ export async function onRequestPost(context) {
           }]
         },
         {
-          // Voiceover track using Shotstack's ElevenLabs integration via Create API
+          // Voiceover track - need to use Create API first, then reference the src
           clips: [{
             asset: {
               type: "audio",
-              provider: "elevenlabs",
-              options: {
-                type: "text-to-speech",
-                text: selectedStory.content, // The Reddit story text
-                voice: voiceSettings.voice_id // e.g., "Adam", "Bella", etc.
-              }
+              src: "https://shotstack-assets.s3.amazonaws.com/music/unminus/ambisax.mp3", // TEMPORARY placeholder
+              // TODO: Use Shotstack Create API to generate ElevenLabs audio first
+              // Then use the returned src URL here
             },
             start: 0,
-            length: trimDuration || duration
+            length: trimDuration || duration,
+            volume: 1.0
           }]
         }
       ]
@@ -243,43 +241,10 @@ export async function onRequestPost(context) {
     
     console.log(`✅ Render started with ID: ${renderId}`);
     
-    // TEMPORARY DEBUG MODE - Return all info for debugging
+    // Return success response
     return new Response(JSON.stringify({
-      success: false, // Set to false to prevent frontend from processing
-      message: "DEBUG MODE - Inspecting upload and timeline structure",
-      debug: {
-        // Upload response info
-        uploadEndpointResponse: {
-          status: uploadResponse.status,
-          data: uploadData,
-          extractedSignedUrl: signedUrl,
-          extractedSourceId: sourceId
-        },
-        // PUT response info
-        putResponse: {
-          status: putResponse.status,
-          headers: Object.fromEntries(putResponse.headers)
-        },
-        // Status check info
-        statusCheckResponse: statusResponse ? {
-          status: statusResponse.status,
-          data: statusData
-        } : null,
-        // Constructed values
-        constructedSourceUrl: sourceUrl,
-        // Timeline that would be sent
-        timeline: timeline,
-        // Render body that would be sent
-        renderBody: renderBody,
-        // Original request data
-        requestData: {
-          targetDuration,
-          voiceSettings,
-          storyTitle: selectedStory?.title,
-          storyContent: selectedStory?.content?.substring(0, 200) + '...'
-        }
-      },
-      // Still include IDs for reference
+      success: true,
+      message: "Video generation started successfully!",
       render_id: renderId,
       source_id: sourceId,
       estimated_time: "3-5 minutes",
