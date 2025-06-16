@@ -166,11 +166,13 @@ export async function onRequestPost(context) {
         'x-api-key': apiKey
       },
       body: JSON.stringify({
-        provider: "elevenlabs",
+        provider: "shotstack",
         options: {
           type: "text-to-speech",
           text: selectedStory.content,
-          voice: voiceSettings.voice_id // e.g., "Adam"
+          voice: voiceSettings.voice_id || "Matthew", // Matthew, Joanna, Amy, etc.
+          language: "en-US",
+          newscaster: true // Professional news-style delivery
         }
       })
     });

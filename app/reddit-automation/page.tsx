@@ -8,7 +8,7 @@ const VideoGenerator = () => {
     uploadedVideo: null,
     category: 'drama',
     targetDuration: 5, // User-chosen duration in minutes
-    voiceId: 'Adam',
+    voiceId: 'Matthew',
     startTime: 0, // Start time in seconds for video trimming
     useProduction: false // Toggle between sandbox and production APIs
   });
@@ -34,10 +34,14 @@ const VideoGenerator = () => {
   ];
 
   const voices = [
-    { id: 'Adam', name: 'Adam - Professional Male' },
-    { id: 'Bella', name: 'Bella - Warm Female' },
-    { id: 'Charlie', name: 'Charlie - Conversational Male' },
-    { id: 'Dorothy', name: 'Dorothy - Mature Female' }
+    { id: 'Matthew', name: 'Matthew - US English Male' },
+    { id: 'Joanna', name: 'Joanna - US English Female' },
+    { id: 'Amy', name: 'Amy - British English Female' },
+    { id: 'Brian', name: 'Brian - British English Male' },
+    { id: 'Ivy', name: 'Ivy - US English Female (Child)' },
+    { id: 'Joey', name: 'Joey - US English Male' },
+    { id: 'Kendra', name: 'Kendra - US English Female' },
+    { id: 'Russell', name: 'Russell - Australian English Male' }
   ];
 
   // Stories will load when user selects category or clicks refresh
