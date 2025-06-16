@@ -155,51 +155,143 @@ export async function onRequestPost(context) {
     
     console.log(`📹 Constructed source URL: ${sourceUrl}`);
     
-    // STEP 3: Generate ElevenLabs audio using Create API
-    console.log('🎤 Step 3: Generating voiceover with ElevenLabs...');
+    // STEP 3: Generate audio using Create API with chunking for long stories
+    console.log('🎤 Step 3: Generating voiceover...');
     
-    const createUrl = `${baseUrl}/create/${stage}/assets`;
-    const audioCreateResponse = await fetch(createUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey
-      },
-      body: JSON.stringify({
-        provider: "shotstack",
-        options: {
-          type: "text-to-speech",
-          text: selectedStory.content,
-          voice: voiceSettings.voice_id || "Matthew", // Matthew, Joanna, Amy, etc.
-          language: "en-US",
-          newscaster: true // Professional news-style delivery
+    // Split story into chunks of max 1900 characters (leaving some buffer)
+    const MAX_CHUNK_SIZE = 1900;
+    const storyText = selectedStory.content;
+    const chunks = [];
+    
+    // Split by sentences to avoid breaking mid-sentence
+    const sentences = storyText.match(/[^.!?]+[.!?]+/g) || [storyText];
+    let currentChunk = '';
+    
+    for (const sentence of sentences) {
+      if ((currentChunk + sentence).length > MAX_CHUNK_SIZE) {
+        if (currentChunk) {
+          chunks.push(currentChunk.trim());
+          currentChunk = sentence;
+        } else {
+          // Single sentence is too long, split it
+          const words = sentence.split(' ');
+          let wordChunk = '';
+          for (const word of words) {
+            if ((wordChunk + ' ' + word).length > MAX_CHUNK_SIZE) {
+              chunks.push(wordChunk.trim());
+              wordChunk = word;
+            } else {
+              wordChunk += (wordChunk ? ' ' : '') + word;
+            }
+          }
+          if (wordChunk) chunks.push(wordChunk.trim());
+          currentChunk = '';
         }
-      })
-    });
+      } else {
+        currentChunk += sentence;
+      }
+    }
+    if (currentChunk) chunks.push(currentChunk.trim());
     
-    if (!audioCreateResponse.ok) {
-      const errorText = await audioCreateResponse.text();
-      console.error('❌ Failed to create ElevenLabs audio:', errorText);
-      throw new Error(`Failed to create audio: ${audioCreateResponse.status} - ${errorText}`);
+    console.log(`📝 Split story into ${chunks.length} chunks for TTS processing`);
+    console.log(`📏 Chunk sizes: ${chunks.map(c => c.length).join(', ')}`);
+    
+    // Generate audio for each chunk
+    const audioAssets = [];
+    const createUrl = `${baseUrl}/create/${stage}/assets`;
+    
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`🎙️ Processing chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)...`);
+      
+      const audioCreateResponse = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey
+        },
+        body: JSON.stringify({
+          provider: "shotstack",
+          options: {
+            type: "text-to-speech",
+            text: chunks[i],
+            voice: voiceSettings.voice_id || "Matthew",
+            language: "en-US",
+            newscaster: true
+          }
+        })
+      });
+      
+      if (!audioCreateResponse.ok) {
+        const errorText = await audioCreateResponse.text();
+        console.error(`❌ Failed to create audio for chunk ${i + 1}:`, errorText);
+        throw new Error(`Failed to create audio chunk ${i + 1}: ${audioCreateResponse.status} - ${errorText}`);
+      }
+      
+      const audioData = await audioCreateResponse.json();
+      console.log(`✅ Audio chunk ${i + 1} created:`, audioData.data.id);
+      
+      audioAssets.push({
+        id: audioData.data.id,
+        url: audioData.data.attributes.url,
+        status: audioData.data.attributes.status,
+        chunkIndex: i
+      });
     }
     
-    const audioData = await audioCreateResponse.json();
-    console.log('✅ Audio creation response:', JSON.stringify(audioData, null, 2));
+    console.log(`🎵 Created ${audioAssets.length} audio assets`);
     
-    const audioAssetId = audioData.data.id;
-    const audioUrl = audioData.data.attributes.url;
-    
-    // Check if we need to wait for audio to be ready
-    if (audioData.data.attributes.status !== 'done') {
-      console.log('⏳ Waiting for audio to be ready...');
-      // In production, you'd poll here until status is 'done'
-      // For now, we'll proceed assuming it's ready
-    }
-    
-    console.log(`🎵 Audio URL: ${audioUrl}`);
+    // For now, we'll use the first chunk's URL for the render
+    // In a full implementation, you'd concatenate all audio chunks
+    const audioUrl = audioAssets[0].url;
+    console.log(`🎵 Using first audio chunk URL: ${audioUrl}`);
+    console.log(`⚠️ Note: Full audio concatenation would be needed for complete story`);
     
     // STEP 4: Create render with source URL + voiceover URL
     console.log('🎥 Step 4: Creating render with video and voiceover...');
+    
+    // Create audio clips array from all chunks
+    const audioClips = [];
+    let currentStart = 0;
+    
+    // If we have multiple audio chunks, we need to concatenate them
+    if (audioAssets.length > 1) {
+      console.log('🔗 Setting up audio concatenation for multiple chunks...');
+      
+      // For now, we'll estimate each chunk's duration based on word count
+      // In production, you'd get actual duration from the Create API response
+      const WORDS_PER_MINUTE = 150; // Average speaking rate
+      const SPEED_MULTIPLIER = 1.3; // Since we're using 1.3x speed
+      
+      for (let i = 0; i < audioAssets.length; i++) {
+        const chunkText = chunks[i];
+        const wordCount = chunkText.split(' ').length;
+        const estimatedDuration = (wordCount / WORDS_PER_MINUTE / SPEED_MULTIPLIER) * 60; // Convert to seconds
+        
+        audioClips.push({
+          asset: {
+            type: "audio",
+            src: audioAssets[i].url
+          },
+          start: currentStart,
+          length: estimatedDuration,
+          volume: 1.0
+        });
+        
+        currentStart += estimatedDuration;
+        console.log(`📊 Audio chunk ${i + 1}: start=${currentStart.toFixed(1)}s, duration=${estimatedDuration.toFixed(1)}s`);
+      }
+    } else {
+      // Single audio chunk
+      audioClips.push({
+        asset: {
+          type: "audio",
+          src: audioUrl
+        },
+        start: 0,
+        length: trimDuration || duration,
+        volume: 1.0
+      });
+    }
     
     // Create the timeline with video and voiceover
     const timeline = {
@@ -221,16 +313,8 @@ export async function onRequestPost(context) {
           }]
         },
         {
-          // Voiceover track with ElevenLabs generated audio
-          clips: [{
-            asset: {
-              type: "audio",
-              src: audioUrl // URL from ElevenLabs Create API
-            },
-            start: 0,
-            length: trimDuration || duration,
-            volume: 1.0
-          }]
+          // Voiceover track with concatenated audio chunks
+          clips: audioClips
         }
       ]
     };
