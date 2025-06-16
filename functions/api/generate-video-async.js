@@ -34,7 +34,14 @@ export async function onRequestPost(context) {
     
     console.log(`📹 Processing video: ${videoFile.name} (${(videoFile.size / 1024 / 1024).toFixed(1)}MB)`);
     console.log(`📖 Story: ${selectedStory.title} (${targetDuration} minutes)`);
-    console.log(`📝 Story length: ${selectedStory.content.length} characters`);
+    console.log(`📝 Story Analysis:`);
+    console.log(`  - Total Characters: ${selectedStory.content.length}`);
+    console.log(`  - Word Count: ${selectedStory.content.split(' ').length}`);
+    console.log(`  - Story Preview: "${selectedStory.content.substring(0, 200)}..."`);
+    console.log(`  - Story Type: ${typeof selectedStory.content}`);
+    console.log(`  - Has Newlines: ${selectedStory.content.includes('\n')}`);
+    console.log(`  - Has Special Chars: ${/[^\x20-\x7E]/.test(selectedStory.content)}`);
+    console.log(`  - Full Story Object:`, JSON.stringify(selectedStory, null, 2));
     
     const apiKey = useProduction 
       ? env.SHOTSTACK_PRODUCTION_API_KEY 
@@ -125,6 +132,13 @@ export async function onRequestPost(context) {
     };
     
     console.log('🎙️ Calling Shotstack TTS...');
+    console.log('📊 TTS Payload Details:');
+    console.log('  - Provider:', audioPayload.provider);
+    console.log('  - Text Length:', audioPayload.options.text.length);
+    console.log('  - Text Preview:', audioPayload.options.text.substring(0, 100) + '...');
+    console.log('  - Text End:', '...' + audioPayload.options.text.substring(audioPayload.options.text.length - 100));
+    console.log('  - Voice:', audioPayload.options.voice);
+    console.log('  - Full Payload:', JSON.stringify(audioPayload, null, 2));
     
     const audioCreateResponse = await fetch(createUrl, {
       method: 'POST',
