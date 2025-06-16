@@ -69,9 +69,10 @@ export async function onRequestPost(context) {
     const uploadData = await uploadResponse.json();
     console.log('✅ Upload response:', JSON.stringify(uploadData, null, 2));
     
-    // Extract the signed URL and ID from the response
+    // Extract the signed URL, ID, and SOURCE URL from the response
     const signedUrl = uploadData.data.attributes.url;
     const sourceId = uploadData.data.attributes.id;
+    const sourceUrl = uploadData.data.attributes.source; // This is what we need for the timeline!
     
     // STEP 2: Upload raw video file to signed URL
     console.log('📤 Step 2: Uploading video file to signed URL...');
@@ -96,9 +97,11 @@ export async function onRequestPost(context) {
     
     console.log('✅ Video uploaded successfully');
     
-    // Construct the source URL from the source ID
-    const sourceUrl = `https://shotstack-ingest-api-${useProduction ? 'v1' : 'stage'}-sources.s3.amazonaws.com/${sourceId}.mp4`;
-    console.log(`📹 Source URL: ${sourceUrl}`);
+    if (!sourceUrl) {
+      throw new Error('No source URL returned from upload - check the upload response structure');
+    }
+    
+    console.log(`📹 Using source URL: ${sourceUrl}`);
     
     // STEP 3: Create render with source URL + voiceover
     console.log('🎥 Step 3: Creating render with voiceover...');
