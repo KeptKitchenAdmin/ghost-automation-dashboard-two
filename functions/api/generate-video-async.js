@@ -120,11 +120,18 @@ export async function onRequestPost(context) {
     
     const createUrl = `${baseUrl}/create/${stage}/assets`;
     
+    // CRITICAL: Ensure story content is under 2000 characters for Shotstack TTS
+    let storyText = selectedStory.content;
+    if (storyText.length > 1950) {  // Leave buffer for safety
+      console.log(`⚠️ Story too long (${storyText.length} chars), truncating to 1950 chars`);
+      storyText = storyText.substring(0, 1950) + "...";
+    }
+    
     const audioPayload = {
       provider: "shotstack",  // Using Shotstack's built-in TTS (NOT elevenlabs)
       options: {
         type: "text-to-speech",
-        text: selectedStory.content,  // Full story text
+        text: storyText,  // Truncated story text (under 2000 chars)
         voice: voiceSettings.voice_id || "Matthew",
         language: "en-US",
         newscaster: true  // Professional news-style delivery
@@ -134,7 +141,8 @@ export async function onRequestPost(context) {
     console.log('🎙️ Calling Shotstack TTS...');
     console.log('📊 TTS Payload Details:');
     console.log('  - Provider:', audioPayload.provider);
-    console.log('  - Text Length:', audioPayload.options.text.length);
+    console.log('  - Original Text Length:', selectedStory.content.length);
+    console.log('  - Final Text Length:', audioPayload.options.text.length);
     console.log('  - Text Preview:', audioPayload.options.text.substring(0, 100) + '...');
     console.log('  - Text End:', '...' + audioPayload.options.text.substring(audioPayload.options.text.length - 100));
     console.log('  - Voice:', audioPayload.options.voice);
