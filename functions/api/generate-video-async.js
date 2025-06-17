@@ -121,10 +121,20 @@ export async function onRequestPost(context) {
     const createUrl = `${baseUrl}/create/${stage}/assets`;
     
     // CRITICAL: Ensure story content is under 2000 characters for Shotstack TTS
-    let storyText = selectedStory.content;
-    if (storyText.length > 1950) {  // Leave buffer for safety
-      console.log(`⚠️ Story too long (${storyText.length} chars), truncating to 1950 chars`);
-      storyText = storyText.substring(0, 1950) + "...";
+    // Validate story content first
+    if (!selectedStory.content || typeof selectedStory.content !== 'string') {
+      throw new Error('Invalid story content: must be a non-empty string');
+    }
+    
+    // Clean and prepare story text
+    let storyText = selectedStory.content.trim()
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+      .replace(/\s+/g, ' '); // Normalize whitespace
+    
+    // More conservative truncation to ensure we stay well under 2000 chars
+    if (storyText.length > 1900) {  // Extra safety buffer
+      console.log(`⚠️ Story too long (${storyText.length} chars), truncating to 1900 chars`);
+      storyText = storyText.substring(0, 1900) + "...";
     }
     
     const audioPayload = {
