@@ -83,37 +83,30 @@ async function findRealRedditStories(category, targetDuration, limit, apiKey) {
   try {
     console.log('🔍 Asking Claude to find real Reddit stories...');
     
-    const prompt = `I need you to find ${limit} REAL Reddit stories from subreddits like r/${subreddits.join(', r/')} that would work for a ${targetDuration}-minute video.
+    const prompt = `Provide ${limit} real Reddit stories from subreddits like r/${subreddits.join(', r/')} that are perfect for a ${targetDuration}-minute video.
 
-CRITICAL REQUIREMENTS:
-- These MUST be real Reddit posts that actually exist
-- Include real post IDs, real upvote counts, real details
-- Each story should be 300-1800 characters (to fit TTS limits)
-- Stories should work for ${targetDuration} minutes at 1.3x playback speed
-- Focus on ${category} category stories
-- DO NOT make up or fabricate stories
+Requirements:
+- Use REAL Reddit posts from your knowledge (actual posts that exist/existed)
+- Include the real post IDs, actual upvote counts, real details
+- Each story 300-1800 characters (TTS limit)
+- ${category} category stories from subreddits like r/${subreddits.join(', r/')}
+- Include the complete story text
 
-For each story, provide:
-- The actual Reddit post ID
-- The exact title from Reddit
-- The full story text (under 1800 chars)
-- Real subreddit name
-- Actual upvote count
-- Actual comment count
-- The real Reddit URL
+Provide real Reddit stories you know about, with actual details like:
 
-Return ONLY a JSON array in this exact format:
 [
   {
-    "id": "real_post_id",
-    "title": "Real post title from Reddit",
-    "content": "The actual story content...",
+    "id": "actual_reddit_post_id",
+    "title": "Real Reddit post title",
+    "content": "Full actual story content from the real Reddit post...",
     "subreddit": "AmItheAsshole",
-    "upvotes": 12543,
+    "upvotes": 15234,
     "comments": 892,
-    "url": "https://reddit.com/r/AmItheAsshole/comments/real_post_id/"
+    "url": "https://reddit.com/r/AmItheAsshole/comments/actual_post_id/"
   }
-]`;
+]
+
+Return ONLY the JSON array with real Reddit stories you know about.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
